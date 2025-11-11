@@ -104,19 +104,22 @@ void Scene2::HandleEvents(const SDL_Event& event)
 {
 	switch (event.type) {
 	case SDL_EVENT_KEY_DOWN:
-		  // Change angle of the ball
-		if (event.key.scancode == SDL_SCANCODE_O) {
-			character->angleDeg -= 10.0f;
+		switch (event.key.scancode) {
+		case SDL_SCANCODE_W: character->vel.y = 5.0f; break;   // вверх
+		case SDL_SCANCODE_S: character->vel.y = -5.0f; break;  // вниз
+		case SDL_SCANCODE_A: character->vel.x = -5.0f; break;  // влево
+		case SDL_SCANCODE_D: character->vel.x = 5.0f; break;   // вправо
+		default: break;
 		}
-		if (event.key.scancode == SDL_SCANCODE_P) {
-			character->angleDeg += 10.0f;
-		}
-		if (event.key.scancode == SDL_SCANCODE_SPACE) {
-			float angleRad = character->angleDeg * (3.14159f / 180.0f);
-			character->vel.y -= sin(angleRad) * 30.0f;
-			character->vel.x += cos(angleRad) * 30.0f;
+		break;
 
-			running = 1;
+	case SDL_EVENT_KEY_UP:
+		switch (event.key.scancode) {
+		case SDL_SCANCODE_W:
+		case SDL_SCANCODE_S: character->vel.y = 0.0f; break;
+		case SDL_SCANCODE_A:
+		case SDL_SCANCODE_D: character->vel.x = 0.0f; break;
+		default: break;
 		}
 		break;
 
@@ -142,6 +145,7 @@ void Scene2::Update(const float deltaTime) {
 }
 
 void Scene2::Render() const {
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
 
 
