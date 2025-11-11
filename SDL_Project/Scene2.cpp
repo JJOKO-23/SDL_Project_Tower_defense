@@ -105,10 +105,10 @@ void Scene2::HandleEvents(const SDL_Event& event)
 	switch (event.type) {
 	case SDL_EVENT_KEY_DOWN:
 		switch (event.key.scancode) {
-		case SDL_SCANCODE_W: character->vel.y = 5.0f; break;   // вверх
-		case SDL_SCANCODE_S: character->vel.y = -5.0f; break;  // вниз
-		case SDL_SCANCODE_A: character->vel.x = -5.0f; break;  // влево
-		case SDL_SCANCODE_D: character->vel.x = 5.0f; break;   // вправо
+		case SDL_SCANCODE_W: character->vel.y = 5.0f; break;   
+		case SDL_SCANCODE_S: character->vel.y = -5.0f; break; 
+		case SDL_SCANCODE_A: character->vel.x = -5.0f; break;  
+		case SDL_SCANCODE_D: character->vel.x = 5.0f; break;   
 		default: break;
 		}
 		break;
