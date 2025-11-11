@@ -4,6 +4,10 @@
 #include <SDL3/SDL.h>
 #include <Matrix.h>
 #include "Scene.h"
+#include "Player.h"
+#include "Enemy.h"
+#include "Tower.h"
+#include "CollisionManager.h"
 #include "Entity.h"
 
 #include <SDL3/SDL_mixer.h>
@@ -19,7 +23,7 @@ private:
 	SDL_Renderer* renderer;
 
 	Entity* back;
-	Entity* character;
+	Entity* character; 
 	
 
 	bool running = 0;

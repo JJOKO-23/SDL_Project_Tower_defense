@@ -28,7 +28,7 @@ public:
 
 	// Just like assignment 1!
 	void ApplyForce(Vec3 netForce);
-	void Update(float deltaTime);
+	virtual void Update(float deltaTime);
 
 	// Need getters for private member variables. 
 	SDL_Surface* GetSurface() const { return surface; }
