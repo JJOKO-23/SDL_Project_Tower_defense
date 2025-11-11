@@ -1,1 +1,51 @@
 #include "CollisionManager.h"
+CollisionManager::CollisionManager(float minX, float maxX, float minY, float maxY) :
+    worldMinX(minX), worldMaxX(maxX), worldMinY(minY), worldMaxY(maxY)
+{
+}
+
+void CollisionManager::ClampToWorld(Entity* obj) {
+    if (obj->pos.x - obj->radius < worldMinX) {
+        obj->pos.x = worldMinX + obj->radius;
+        obj->vel.x = 0;
+    }
+    if (obj->pos.x + obj->radius > worldMaxX) {
+        obj->pos.x = worldMaxX - obj->radius;
+        obj->vel.x = 0;
+    }
+    if (obj->pos.y - obj->radius < worldMinY) {
+        obj->pos.y = worldMinY + obj->radius;
+        obj->vel.y = 0;
+    }
+    if (obj->pos.y + obj->radius > worldMaxY) {
+        obj->pos.y = worldMaxY - obj->radius;
+        obj->vel.y = 0;
+    }
+}
+
+bool CollisionManager::Intersects(Entity* a, Entity* b) {
+    // Простая проверка круг-круг
+    float dx = a->pos.x - b->pos.x;
+    float dy = a->pos.y - b->pos.y;
+    float distanceSquared = dx * dx + dy * dy;
+    float radiusSum = a->radius + b->radius;
+    return distanceSquared < radiusSum * radiusSum;
+}
+
+void CollisionManager::ResolveCollision(Entity* a, Entity* b) {
+    // Простейший вариант: меняем скорость местами (можно улучшить)
+    std::swap(a->vel, b->vel);
+}
+
+void CollisionManager::CheckCollisions(std::vector<Entity*>& entities) {
+    for (size_t i = 0; i < entities.size(); ++i) {
+        // Ограничиваем объект границами мира
+        ClampToWorld(entities[i]);
+
+        for (size_t j = i + 1; j < entities.size(); ++j) {
+            if (Intersects(entities[i], entities[j])) {
+                ResolveCollision(entities[i], entities[j]);
+            }
+        }
+    }
+}

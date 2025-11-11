@@ -24,8 +24,8 @@ private:
 
 	Entity* back;
 	Entity* character; 
-	
-
+	std::vector<Entity*> entities;
+	CollisionManager* collisionManager;
 	bool running = 0;
 
 	float flappyScale; // a scale to make the texture smaller or larger

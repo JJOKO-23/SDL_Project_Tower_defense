@@ -45,11 +45,12 @@ bool Scene2::OnCreate() {
 	back = new Entity();
 	back->pos = Vec3(0.0f, 15.0f, 0.0f);
 	back->SetImage("textures/background4b.png", renderer);
-/*
-	character = new Entity();
-	character->pos = Vec3(0.0f, 5.0f, 0.0f);
-	character->SetImage("textures/idle.png", renderer);*/
 
+	character = new Entity();
+	character->pos = Vec3(15.0f, 7.5f, 0.0f);
+	character->radius = 0.5f;
+	//character->SetImage("textures/idle.png", renderer);
+	entities.push_back(character);
 
 	SDL_Init(SDL_INIT_AUDIO);
 	MIX_Init();
@@ -68,7 +69,7 @@ bool Scene2::OnCreate() {
 	MIX_PlayAudio(mixer, Music);
 	MIX_DestroyAudio(Music);
 
-
+	collisionManager = new CollisionManager(0.0f, xAxis, 0.0f, yAxis);
 	return true;
 }
 
@@ -86,20 +87,24 @@ void Scene2::OnDestroy() {
 		MIX_Quit();
 	}
 
+	if (collisionManager) {
+		delete collisionManager;
+		collisionManager = nullptr;
+	}
 	// Delete the objects created on the heap
 	// and set to the null pointer just to be safe
 	delete back;
 	back = nullptr;
 
-	/*delete character;
-	character = nullptr;*/
+	delete character;
+	character = nullptr;
 }
 
 void Scene2::HandleEvents(const SDL_Event& event)
 {
 	switch (event.type) {
 	case SDL_EVENT_KEY_DOWN:
-		/*  // Change angle of the ball
+		  // Change angle of the ball
 		if (event.key.scancode == SDL_SCANCODE_O) {
 			character->angleDeg -= 10.0f;
 		}
@@ -112,7 +117,7 @@ void Scene2::HandleEvents(const SDL_Event& event)
 			character->vel.x += cos(angleRad) * 30.0f;
 
 			running = 1;
-		}*/
+		}
 		break;
 
 	default:
@@ -130,6 +135,10 @@ void Scene2::Update(const float deltaTime) {
 		character->ApplyForce(netForce); // gravity
 		character->Update(deltaTime);
 	}*/
+
+	character->pos += character->vel * deltaTime;
+	collisionManager->CheckCollisions(entities);
+
 }
 
 void Scene2::Render() const {
@@ -137,24 +146,22 @@ void Scene2::Render() const {
 
 
 	Vec3 screenCoords = projectionMatrix * back->pos;
+	SDL_FRect rect;
+	rect.x = screenCoords.x;
+	rect.y = screenCoords.y;
+	rect.w = back->GetSurface()->w * 1.5f;
+	rect.h = back->GetSurface()->h * 1.5f;
+	SDL_RenderTextureRotated(renderer, back->GetTexture(), nullptr, &rect, back->angleDeg, nullptr, SDL_FLIP_NONE);
+
 	
-	SDL_FRect square;
-	square.x = screenCoords.x;
-	square.y = screenCoords.y;
-	float scale = 1.5f;
-	square.w = back->GetSurface()->w * scale;
-	square.h = back->GetSurface()->h * scale;
-
-	SDL_RenderTextureRotated(renderer, back->GetTexture(), nullptr, &square, back->angleDeg, nullptr, SDL_FLIP_NONE);
-
-/*
 	screenCoords = projectionMatrix * character->pos;
-	square.x = screenCoords.x;
-	square.y = screenCoords.y;
-	square.w = character->GetSurface()->w * flappyScale;
-	square.h = character->GetSurface()->h * flappyScale;
-	SDL_RenderTextureRotated(renderer, character->GetTexture(), nullptr, &square, character->angleDeg, nullptr, SDL_FLIP_NONE);
-	*/
+	rect.x = screenCoords.x - 10;
+	rect.y = screenCoords.y - 10;
+	rect.w = 20;
+	rect.h = 20;
+	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+	SDL_RenderFillRect(renderer, &rect);
+	
 	//screenCoords = projectionMatrix * back->pos;
 	//square.x = screenCoords.x;
 	//square.y = screenCoords.y;
