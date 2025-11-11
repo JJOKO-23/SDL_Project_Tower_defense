@@ -24,7 +24,7 @@ void CollisionManager::ClampToWorld(Entity* obj) {
 }
 
 bool CollisionManager::Intersects(Entity* a, Entity* b) {
-    // Простая проверка круг-круг
+    
     float dx = a->pos.x - b->pos.x;
     float dy = a->pos.y - b->pos.y;
     float distanceSquared = dx * dx + dy * dy;
@@ -33,13 +33,13 @@ bool CollisionManager::Intersects(Entity* a, Entity* b) {
 }
 
 void CollisionManager::ResolveCollision(Entity* a, Entity* b) {
-    // Простейший вариант: меняем скорость местами (можно улучшить)
+
     std::swap(a->vel, b->vel);
 }
 
 void CollisionManager::CheckCollisions(std::vector<Entity*>& entities) {
     for (size_t i = 0; i < entities.size(); ++i) {
-        // Ограничиваем объект границами мира
+        
         ClampToWorld(entities[i]);
 
         for (size_t j = i + 1; j < entities.size(); ++j) {
