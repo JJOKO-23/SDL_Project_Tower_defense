@@ -12,6 +12,7 @@ Scene2::Scene2(SDL_Window* sdlWindow_) :
 	, renderer(nullptr)
 	, back(nullptr)
 	, character(nullptr)
+	, enemy1(nullptr)
 	, flappyScale(2.0f)
 	, xAxis(30.0f)
 	, yAxis(15.0f)
@@ -49,8 +50,13 @@ bool Scene2::OnCreate() {
 	character = new Entity();
 	character->pos = Vec3(15.0f, 7.5f, 0.0f);
 	character->radius = 0.5f;
+
+	enemy1 = new Entity();
+	enemy1->pos = Vec3(10.0f, 7.5f, 0.0f);
+	enemy1->radius = 0.5f;
 	//character->SetImage("textures/idle.png", renderer);
 	entities.push_back(character);
+	entities.push_back(enemy1);
 
 	SDL_Init(SDL_INIT_AUDIO);
 	MIX_Init();
@@ -98,6 +104,9 @@ void Scene2::OnDestroy() {
 
 	delete character;
 	character = nullptr;
+
+	delete enemy1;
+	enemy1 = nullptr;
 }
 
 void Scene2::HandleEvents(const SDL_Event& event)
@@ -157,6 +166,7 @@ void Scene2::Render() const {
 	rect.h = back->GetSurface()->h * 1.5f;
 	SDL_RenderTextureRotated(renderer, back->GetTexture(), nullptr, &rect, back->angleDeg, nullptr, SDL_FLIP_NONE);
 
+
 	
 	screenCoords = projectionMatrix * character->pos;
 	rect.x = screenCoords.x - 10;
@@ -165,6 +175,15 @@ void Scene2::Render() const {
 	rect.h = 20;
 	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 	SDL_RenderFillRect(renderer, &rect);
+
+	screenCoords = projectionMatrix * enemy1->pos;
+	rect.x = screenCoords.x - 10;
+	rect.y = screenCoords.y - 10;
+	rect.w = 20;
+	rect.h = 20;
+	SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+	SDL_RenderFillRect(renderer, &rect);
+
 	
 	//screenCoords = projectionMatrix * back->pos;
 	//square.x = screenCoords.x;

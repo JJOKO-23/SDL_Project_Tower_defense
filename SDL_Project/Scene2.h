@@ -18,12 +18,13 @@ private:
 	SDL_Window* window;
 	float xAxis;
 	float yAxis;
-
+	
 	Matrix4 projectionMatrix;
 	SDL_Renderer* renderer;
 
 	Entity* back;
 	Entity* character; 
+	Entity* enemy1;
 	std::vector<Entity*> entities;
 	CollisionManager* collisionManager;
 	bool running = 0;
