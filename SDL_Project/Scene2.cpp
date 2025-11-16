@@ -50,8 +50,8 @@ bool Scene2::OnCreate() {
 	back->SetImage("textures/background4b.png", renderer);
 
 	player = new Player();
-	player->pos = Vec3(15, 5, 0);
-	player->radius = 0.5f;
+	player->pos = Vec3(15, 8, 0);
+	//player->radius = 0.5f;
 
 	character = new Entity();
 	character->pos = Vec3(15.0f, 7.5f, 0.0f);
@@ -163,21 +163,23 @@ void Scene2::Render() const {
 	SDL_RenderTextureRotated(renderer, back->GetTexture(), nullptr, &rect, back->angleDeg, nullptr, SDL_FLIP_NONE);
 
 	screenCoords = projectionMatrix * player->pos;
+	float size = player->radius * 2.0f * worldScale;
 	SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
 	SDL_FRect pc;
-	pc.x = screenCoords.x - 10;
-	pc.y = screenCoords.y - 10;
-	pc.w = 20;
-	pc.h = 20;
+	pc.x = screenCoords.x - size * 0.5f;
+	pc.y = screenCoords.y - size * 0.5f;
+	pc.w = size;
+	pc.h = size;
 	SDL_RenderFillRect(renderer, &pc);
 
 	for (auto p : platforms) {
 		Vec3 sc = projectionMatrix * p->pos;
 		SDL_FRect r;
-		r.x = sc.x - p->width * 10;  
-		r.y = sc.y - p->height * 10;
-		r.w = p->width * 20;
-		r.h = p->height * 20;
+		
+		r.w = p->width * worldScale;
+		r.h = p->height * worldScale;
+		r.x = sc.x - r.w * 0.5f;
+		r.y = sc.y - r.h * 0.5f;
 		SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
 		SDL_RenderFillRect(renderer, &r);
 	}

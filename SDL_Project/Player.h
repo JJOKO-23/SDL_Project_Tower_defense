@@ -16,6 +16,9 @@ private:
 public:
     bool grounded;
 	bool onPlatform;
+    float width = 1.0f;
+    float height = 1.8f;
+
     Player();
     ~Player() = default;
 

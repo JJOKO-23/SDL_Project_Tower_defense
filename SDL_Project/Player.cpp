@@ -3,7 +3,7 @@
 
 Player::Player()
 {
-    moveSpeed = 8.0f;   // скорость перемещения
+    moveSpeed = 8.0f;   
     grounded = false;
 
     pos = Vec3(5.0f, 5.0f, 0.0f);

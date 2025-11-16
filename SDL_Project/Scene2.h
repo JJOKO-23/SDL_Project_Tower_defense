@@ -19,6 +19,7 @@ private:
 	SDL_Window* window;
 	float xAxis;
 	float yAxis;
+	float worldScale = 20.0f;
 	
 	Matrix4 projectionMatrix;
 	SDL_Renderer* renderer;
