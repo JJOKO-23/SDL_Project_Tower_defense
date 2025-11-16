@@ -13,6 +13,8 @@ Scene2::Scene2(SDL_Window* sdlWindow_) :
 	, back(nullptr)
 	, character(nullptr)
 	, enemy1(nullptr)
+	
+	, player(nullptr)
 	, flappyScale(2.0f)
 	, xAxis(30.0f)
 	, yAxis(15.0f)
@@ -47,6 +49,10 @@ bool Scene2::OnCreate() {
 	back->pos = Vec3(0.0f, 15.0f, 0.0f);
 	back->SetImage("textures/background4b.png", renderer);
 
+	player = new Player();
+	player->pos = Vec3(15, 5, 0);
+	player->radius = 0.5f;
+
 	character = new Entity();
 	character->pos = Vec3(15.0f, 7.5f, 0.0f);
 	character->radius = 0.5f;
@@ -55,6 +61,13 @@ bool Scene2::OnCreate() {
 	enemy1->pos = Vec3(10.0f, 7.5f, 0.0f);
 	enemy1->radius = 0.5f;
 	//character->SetImage("textures/idle.png", renderer);
+	Platform* ground = new Platform(Vec3(15, 1, 0), 30, 2);
+	platforms.push_back(ground);
+
+	Platform* block = new Platform(Vec3(10, 8, 0), 4, 1);
+	platforms.push_back(block);
+
+
 	entities.push_back(character);
 	entities.push_back(enemy1);
 
@@ -107,35 +120,16 @@ void Scene2::OnDestroy() {
 
 	delete enemy1;
 	enemy1 = nullptr;
+
+	delete player;
+	player = nullptr;
+
 }
 
 void Scene2::HandleEvents(const SDL_Event& event)
 {
-	switch (event.type) {
-	case SDL_EVENT_KEY_DOWN:
-		switch (event.key.scancode) {
-		case SDL_SCANCODE_W: character->vel.y = 5.0f; break;   
-		case SDL_SCANCODE_S: character->vel.y = -5.0f; break; 
-		case SDL_SCANCODE_A: character->vel.x = -5.0f; break;  
-		case SDL_SCANCODE_D: character->vel.x = 5.0f; break;   
-		default: break;
-		}
-		break;
-
-	case SDL_EVENT_KEY_UP:
-		switch (event.key.scancode) {
-		case SDL_SCANCODE_W:
-		case SDL_SCANCODE_S: character->vel.y = 0.0f; break;
-		case SDL_SCANCODE_A:
-		case SDL_SCANCODE_D: character->vel.x = 0.0f; break;
-		default: break;
-		}
-		break;
-
-	default:
-		break;
-	}
-}
+	player->HandleInput(event);
+} 
 
 void Scene2::Update(const float deltaTime) {
 	/// Physics goes here	
@@ -148,7 +142,9 @@ void Scene2::Update(const float deltaTime) {
 		character->Update(deltaTime);
 	}*/
 
+	player->Update(deltaTime);
 	character->pos += character->vel * deltaTime;
+	collisionManager->CheckPlayerPlatform(player, platforms);
 	collisionManager->CheckCollisions(entities);
 
 }
@@ -166,7 +162,25 @@ void Scene2::Render() const {
 	rect.h = back->GetSurface()->h * 1.5f;
 	SDL_RenderTextureRotated(renderer, back->GetTexture(), nullptr, &rect, back->angleDeg, nullptr, SDL_FLIP_NONE);
 
+	screenCoords = projectionMatrix * player->pos;
+	SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
+	SDL_FRect pc;
+	pc.x = screenCoords.x - 10;
+	pc.y = screenCoords.y - 10;
+	pc.w = 20;
+	pc.h = 20;
+	SDL_RenderFillRect(renderer, &pc);
 
+	for (auto p : platforms) {
+		Vec3 sc = projectionMatrix * p->pos;
+		SDL_FRect r;
+		r.x = sc.x - p->width * 10;  
+		r.y = sc.y - p->height * 10;
+		r.w = p->width * 20;
+		r.h = p->height * 20;
+		SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+		SDL_RenderFillRect(renderer, &r);
+	}
 	
 	screenCoords = projectionMatrix * character->pos;
 	rect.x = screenCoords.x - 10;

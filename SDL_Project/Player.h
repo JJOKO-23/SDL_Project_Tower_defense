@@ -11,8 +11,11 @@ private:
     bool attacking;
     float attackCooldown;
     float attackTimer;
+    
 
 public:
+    bool grounded;
+	bool onPlatform;
     Player();
     ~Player() = default;
 

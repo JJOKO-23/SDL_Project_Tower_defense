@@ -7,6 +7,7 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "Tower.h"
+#include "Platform.h"
 #include "CollisionManager.h"
 #include "Entity.h"
 
@@ -25,7 +26,10 @@ private:
 	Entity* back;
 	Entity* character; 
 	Entity* enemy1;
+	Player* player;
+	
 	std::vector<Entity*> entities;
+	std::vector<Platform*> platforms;
 	CollisionManager* collisionManager;
 	bool running = 0;
 

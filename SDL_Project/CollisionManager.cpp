@@ -49,3 +49,35 @@ void CollisionManager::CheckCollisions(std::vector<Entity*>& entities) {
         }
     }
 }
+
+void CollisionManager::CheckPlayerPlatform(Player* player, const std::vector<Platform*>& platforms)
+{
+    for (auto plat : platforms)
+    {
+		// borders of the platform
+        float left = plat->pos.x - plat->width / 2;
+        float right = plat->pos.x + plat->width / 2;
+        float bottom = plat->pos.y;
+        float top = plat->pos.y + plat->height;
+
+        
+        bool xOverlap = (player->pos.x > left && player->pos.x < right);
+
+		// fall on the platform
+        bool yHit = (player->pos.y - player->radius <= top &&
+            player->pos.y - player->radius >= top - 0.3f &&
+            player->vel.y < 0);
+
+        if (xOverlap && yHit)
+        {
+			/// player on platform
+            player->pos.y = top + player->radius;
+            player->vel.y = 0;
+            player->grounded = true;
+        }
+    }
+
+    
+    if (!player->onPlatform)
+        player->grounded = false;
+}
