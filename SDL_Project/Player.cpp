@@ -12,6 +12,8 @@ Player::Player()
 
     mass = 1.0f;
     radius = 0.5f;
+
+    Animation animation;
 }
 
 void Player::HandleInput(const SDL_Event& event)

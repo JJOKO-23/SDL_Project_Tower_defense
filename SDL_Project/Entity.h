@@ -4,6 +4,7 @@
 #include <Vector.h>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_image.h>
+#include "Animation.h"
 using namespace MATH;
 
 class Entity {
@@ -25,6 +26,9 @@ public:
 	Entity();
 	~Entity();
 	void SetImage(const char* filename, SDL_Renderer* renderer);
+	void AddAnimationFrame(const char* filename, SDL_Renderer* renderer);
+
+	Animation animation;
 
 	// Just like assignment 1!
 	void ApplyForce(Vec3 netForce);

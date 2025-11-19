@@ -3,6 +3,7 @@
 #define PLAYER_H
 
 #include "Entity.h"
+#include "Animation.h"
 #include <SDL3/SDL.h>
 
 class Player : public Entity {

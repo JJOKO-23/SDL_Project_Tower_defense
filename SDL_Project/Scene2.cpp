@@ -1,4 +1,4 @@
-#include "Scene2.h"
+﻿#include "Scene2.h"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_image.h>
 #include <MMath.h>
@@ -51,11 +51,32 @@ bool Scene2::OnCreate() {
 
 	player = new Player();
 	player->pos = Vec3(15, 8, 0);
+	player->radius = 1.0f;
 	//player->radius = 0.5f;
 
-	character = new Entity();
-	character->pos = Vec3(15.0f, 7.5f, 0.0f);
-	character->radius = 0.5f;
+	// файликик можно менять мяу
+	player->AddAnimationFrame("textures/IDLE_000.png", renderer);
+	player->AddAnimationFrame("textures/IDLE_001.png", renderer);
+	player->AddAnimationFrame("textures/IDLE_002.png", renderer);
+	player->AddAnimationFrame("textures/IDLE_003.png", renderer);
+	player->AddAnimationFrame("textures/IDLE_004.png", renderer);
+	player->AddAnimationFrame("textures/IDLE_005.png", renderer);
+	player->AddAnimationFrame("textures/IDLE_006.png", renderer);
+	player->AddAnimationFrame("textures/IDLE_007.png", renderer);
+	player->AddAnimationFrame("textures/IDLE_008.png", renderer);
+	player->AddAnimationFrame("textures/IDLE_009.png", renderer);
+	player->AddAnimationFrame("textures/IDLE_010.png", renderer);
+	player->AddAnimationFrame("textures/IDLE_011.png", renderer);
+	player->AddAnimationFrame("textures/IDLE_012.png", renderer);
+	player->AddAnimationFrame("textures/IDLE_013.png", renderer);
+	player->AddAnimationFrame("textures/IDLE_014.png", renderer);
+	player->AddAnimationFrame("textures/IDLE_015.png", renderer);
+	player->AddAnimationFrame("textures/IDLE_016.png", renderer);
+	player->AddAnimationFrame("textures/IDLE_017.png", renderer);
+
+
+	// скорость анимации
+	player->animation.SetFPS(12.0f);
 
 	enemy1 = new Entity();
 	enemy1->pos = Vec3(10.0f, 7.5f, 0.0f);
@@ -68,7 +89,7 @@ bool Scene2::OnCreate() {
 	platforms.push_back(block);
 
 
-	entities.push_back(character);
+	entities.push_back(player);
 	entities.push_back(enemy1);
 
 	SDL_Init(SDL_INIT_AUDIO);
@@ -143,15 +164,28 @@ void Scene2::Update(const float deltaTime) {
 	}*/
 
 	player->Update(deltaTime);
-	character->pos += character->vel * deltaTime;
+	//character->pos += character->vel * deltaTime;
 	collisionManager->CheckPlayerPlatform(player, platforms);
 	collisionManager->CheckCollisions(entities);
+
+	player->animation.Update(deltaTime);
+
+	//if (running) {
+	//	Vec3 gravity = Vec3(0.0f, -9.8f, 0.0f);
+	//	Vec3 drag = -0.2f * character->vel;
+	//	Vec3 wind = Vec3(-15.0f, 0.0f, 0.0f);
+	//	Vec3 netForce = gravity + drag + wind;
+	//	//character->ApplyForce(netForce);
+	//	//character->Update(deltaTime);
+	//}
 
 }
 
 void Scene2::Render() const {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
+
+
 
 
 	Vec3 screenCoords = projectionMatrix * back->pos;
@@ -164,13 +198,19 @@ void Scene2::Render() const {
 
 	screenCoords = projectionMatrix * player->pos;
 	float size = player->radius * 2.0f * worldScale;
-	SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
-	SDL_FRect pc;
-	pc.x = screenCoords.x - size * 0.5f;
-	pc.y = screenCoords.y - size * 0.5f;
-	pc.w = size;
-	pc.h = size;
-	SDL_RenderFillRect(renderer, &pc);
+	//SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
+
+	//это АНИМАЦИЯ НЕ ТРОГАТЬ 
+	
+	SDL_Texture* pFrame = player->animation.GetCurrentFrame();
+	screenCoords = projectionMatrix * player->pos;
+	SDL_FRect pr;
+	pr.x = screenCoords.x;
+	pr.y = screenCoords.y;
+	pr.w = 150;     // размер спрайта на экране
+	pr.h = 150;
+
+	SDL_RenderTextureRotated(renderer, pFrame, nullptr, &pr, 0, nullptr, SDL_FLIP_NONE);
 
 	for (auto p : platforms) {
 		Vec3 sc = projectionMatrix * p->pos;
@@ -184,14 +224,6 @@ void Scene2::Render() const {
 		SDL_RenderFillRect(renderer, &r);
 	}
 	
-	screenCoords = projectionMatrix * character->pos;
-	rect.x = screenCoords.x - 10;
-	rect.y = screenCoords.y - 10;
-	rect.w = 20;
-	rect.h = 20;
-	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-	SDL_RenderFillRect(renderer, &rect);
-
 	screenCoords = projectionMatrix * enemy1->pos;
 	rect.x = screenCoords.x - 10;
 	rect.y = screenCoords.y - 10;
@@ -199,15 +231,6 @@ void Scene2::Render() const {
 	rect.h = 20;
 	SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
 	SDL_RenderFillRect(renderer, &rect);
-
-	
-	//screenCoords = projectionMatrix * back->pos;
-	//square.x = screenCoords.x;
-	//square.y = screenCoords.y;
-	//square.w = back->GetSurface()->w  ;
-	//square.h = back->GetSurface()->h ;
-	//SDL_RenderTextureRotated(renderer, back->GetTexture(), nullptr, &square, back->angleDeg, nullptr, SDL_FLIP_NONE);
-
 
 
 	// Update the screen
