@@ -34,3 +34,5 @@ SDL_Texture* Animation::GetCurrentFrame() const {
     if (frames.empty()) return nullptr;
     return frames[currentFrame];
 }
+
+

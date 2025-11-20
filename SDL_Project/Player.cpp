@@ -14,6 +14,8 @@ Player::Player()
     radius = 0.5f;
 
     Animation animation;
+
+    currentAnim = &idleAnim;
 }
 
 void Player::HandleInput(const SDL_Event& event)
@@ -33,10 +35,12 @@ void Player::HandleInput(const SDL_Event& event)
 
         case SDL_SCANCODE_A:
             vel.x = -moveSpeed;
+            facingRight = false;
             break;
 
         case SDL_SCANCODE_D:
             vel.x = moveSpeed;
+             facingRight = true;
             break;
 
         default:
@@ -78,4 +82,13 @@ void Player::Update(float deltaTime)
         vel.y = -20.0f;
 
     pos += vel * deltaTime;
+
+    bool isMoving = (vel.x != 0 || vel.y > 0.5f);
+
+    if (isMoving)
+        currentAnim = &walkAnim;
+    else
+        currentAnim = &idleAnim;
+
+    currentAnim->Update(deltaTime);
 }

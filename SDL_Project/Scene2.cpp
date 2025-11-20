@@ -4,6 +4,7 @@
 #include <MMath.h>
 #include <iostream>
 #include "Entity.h"
+#include "Player.h"
 
 
 
@@ -54,29 +55,49 @@ bool Scene2::OnCreate() {
 	player->radius = 1.0f;
 	//player->radius = 0.5f;
 
-	// файликик можно менять мяу
-	player->AddAnimationFrame("textures/IDLE_000.png", renderer);
-	player->AddAnimationFrame("textures/IDLE_001.png", renderer);
-	player->AddAnimationFrame("textures/IDLE_002.png", renderer);
-	player->AddAnimationFrame("textures/IDLE_003.png", renderer);
-	player->AddAnimationFrame("textures/IDLE_004.png", renderer);
-	player->AddAnimationFrame("textures/IDLE_005.png", renderer);
-	player->AddAnimationFrame("textures/IDLE_006.png", renderer);
-	player->AddAnimationFrame("textures/IDLE_007.png", renderer);
-	player->AddAnimationFrame("textures/IDLE_008.png", renderer);
-	player->AddAnimationFrame("textures/IDLE_009.png", renderer);
-	player->AddAnimationFrame("textures/IDLE_010.png", renderer);
-	player->AddAnimationFrame("textures/IDLE_011.png", renderer);
-	player->AddAnimationFrame("textures/IDLE_012.png", renderer);
-	player->AddAnimationFrame("textures/IDLE_013.png", renderer);
-	player->AddAnimationFrame("textures/IDLE_014.png", renderer);
-	player->AddAnimationFrame("textures/IDLE_015.png", renderer);
-	player->AddAnimationFrame("textures/IDLE_016.png", renderer);
-	player->AddAnimationFrame("textures/IDLE_017.png", renderer);
+	#pragma region PlayerIdleAnimation
+		player->idleAnim.AddFrame(IMG_LoadTexture(renderer, "textures/IDLE_000.png"));
+		player->idleAnim.AddFrame(IMG_LoadTexture(renderer, "textures/IDLE_001.png"));
+		player->idleAnim.AddFrame(IMG_LoadTexture(renderer, "textures/IDLE_002.png"));
+		player->idleAnim.AddFrame(IMG_LoadTexture(renderer, "textures/IDLE_003.png"));
+		player->idleAnim.AddFrame(IMG_LoadTexture(renderer, "textures/IDLE_004.png"));
+		player->idleAnim.AddFrame(IMG_LoadTexture(renderer, "textures/IDLE_005.png"));
+		player->idleAnim.AddFrame(IMG_LoadTexture(renderer, "textures/IDLE_006.png"));
+		player->idleAnim.AddFrame(IMG_LoadTexture(renderer, "textures/IDLE_007.png"));
+		player->idleAnim.AddFrame(IMG_LoadTexture(renderer, "textures/IDLE_008.png"));
+		player->idleAnim.AddFrame(IMG_LoadTexture(renderer, "textures/IDLE_009.png"));
+		player->idleAnim.AddFrame(IMG_LoadTexture(renderer, "textures/IDLE_010.png"));
+		player->idleAnim.AddFrame(IMG_LoadTexture(renderer, "textures/IDLE_011.png"));
+		player->idleAnim.AddFrame(IMG_LoadTexture(renderer, "textures/IDLE_012.png"));
+		player->idleAnim.AddFrame(IMG_LoadTexture(renderer, "textures/IDLE_013.png"));
+		player->idleAnim.AddFrame(IMG_LoadTexture(renderer, "textures/IDLE_014.png"));
+		player->idleAnim.AddFrame(IMG_LoadTexture(renderer, "textures/IDLE_015.png"));
+		player->idleAnim.AddFrame(IMG_LoadTexture(renderer, "textures/IDLE_016.png"));
+		player->idleAnim.AddFrame(IMG_LoadTexture(renderer, "textures/IDLE_017.png"));
+		// файликик можно менять мяу
 
+	#pragma endregion
 
+	#pragma region PlayerWALKAnimation
+	player->walkAnim.AddFrame(IMG_LoadTexture(renderer, "textures/WALK_000.png"));
+	player->walkAnim.AddFrame(IMG_LoadTexture(renderer, "textures/WALK_001.png"));
+	player->walkAnim.AddFrame(IMG_LoadTexture(renderer, "textures/WALK_002.png"));
+	player->walkAnim.AddFrame(IMG_LoadTexture(renderer, "textures/WALK_003.png"));
+	player->walkAnim.AddFrame(IMG_LoadTexture(renderer, "textures/WALK_004.png"));
+	player->walkAnim.AddFrame(IMG_LoadTexture(renderer, "textures/WALK_005.png"));
+	player->walkAnim.AddFrame(IMG_LoadTexture(renderer, "textures/WALK_006.png"));
+	player->walkAnim.AddFrame(IMG_LoadTexture(renderer, "textures/WALK_007.png"));
+	player->walkAnim.AddFrame(IMG_LoadTexture(renderer, "textures/WALK_008.png"));
+	player->walkAnim.AddFrame(IMG_LoadTexture(renderer, "textures/WALK_009.png"));
+	player->walkAnim.AddFrame(IMG_LoadTexture(renderer, "textures/WALK_010.png"));
+	player->walkAnim.AddFrame(IMG_LoadTexture(renderer, "textures/WALK_011.png"));
+	player->walkAnim.AddFrame(IMG_LoadTexture(renderer, "textures/WALK_012.png"));
+	player->walkAnim.AddFrame(IMG_LoadTexture(renderer, "textures/WALK_013.png"));
+	player->walkAnim.AddFrame(IMG_LoadTexture(renderer, "textures/WALK_014.png"));
+	player->walkAnim.AddFrame(IMG_LoadTexture(renderer, "textures/WALK_015.png"));
+	#pragma endregion
 	// скорость анимации
-	player->animation.SetFPS(12.0f);
+	player->animation.SetFPS(17.0f);
 
 	enemy1 = new Entity();
 	enemy1->pos = Vec3(10.0f, 7.5f, 0.0f);
@@ -168,7 +189,7 @@ void Scene2::Update(const float deltaTime) {
 	collisionManager->CheckPlayerPlatform(player, platforms);
 	collisionManager->CheckCollisions(entities);
 
-	player->animation.Update(deltaTime);
+	
 
 	//if (running) {
 	//	Vec3 gravity = Vec3(0.0f, -9.8f, 0.0f);
@@ -202,7 +223,7 @@ void Scene2::Render() const {
 
 	//это АНИМАЦИЯ НЕ ТРОГАТЬ 
 	
-	SDL_Texture* pFrame = player->animation.GetCurrentFrame();
+	SDL_Texture* pFrame = player->currentAnim->GetCurrentFrame();
 	screenCoords = projectionMatrix * player->pos;
 	SDL_FRect pr;
 	pr.x = screenCoords.x;
@@ -210,8 +231,10 @@ void Scene2::Render() const {
 	pr.w = 150;     // размер спрайта на экране
 	pr.h = 150;
 
-	SDL_RenderTextureRotated(renderer, pFrame, nullptr, &pr, 0, nullptr, SDL_FLIP_NONE);
+	SDL_FlipMode flip = player->facingRight ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
 
+	SDL_RenderTextureRotated(renderer, pFrame, nullptr, &pr, 0, nullptr, flip);;
+	
 	for (auto p : platforms) {
 		Vec3 sc = projectionMatrix * p->pos;
 		SDL_FRect r;
