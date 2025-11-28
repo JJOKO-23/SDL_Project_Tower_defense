@@ -28,6 +28,7 @@ private:
 	Entity* character; 
 	Entity* enemy1;
 	Player* player;
+
 	
 	std::vector<Entity*> entities;
 	std::vector<Platform*> platforms;

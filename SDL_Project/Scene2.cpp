@@ -181,7 +181,17 @@ void Scene2::Update(const float deltaTime) {
 	//}
 
 }
+void DrawAABB(SDL_Renderer* renderer, float x, float y, float w, float h, SDL_Color color) {
+	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 
+	SDL_FRect rect;
+	rect.x = x;
+	rect.y = y;
+	rect.w = w;
+	rect.h = h;
+
+	SDL_RenderRect(renderer, &rect);
+}
 void Scene2::Render() const {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
@@ -213,19 +223,33 @@ void Scene2::Render() const {
 
 
 	SDL_RenderTextureRotated(renderer, pFrame, nullptr, &pr, 0, nullptr, SDL_FLIP_NONE);
+	DrawAABB(renderer, pr.x, pr.y, pr.w, pr.h, SDL_Color{ 0, 255, 0, 255 });
 
-	for (auto p : platforms) {
+	
+	
+	float pixelsPerUnitX = 1280 / xAxis;
+	float pixelsPerUnitY = 720 / yAxis;
+
+	for (auto p : platforms)
+	{
 		Vec3 sc = projectionMatrix * p->pos;
+
 		SDL_FRect r;
-		
-		r.w = p->width * worldScale;
-		r.h = p->height * worldScale;
+		r.w = p->width * pixelsPerUnitX;
+		r.h = p->height * pixelsPerUnitY;
+
 		r.x = sc.x - r.w * 0.5f;
 		r.y = sc.y - r.h * 0.5f;
+
 		SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
 		SDL_RenderFillRect(renderer, &r);
+
+		// draw texture
+		SDL_RenderTexture(renderer, p->texture, nullptr, &r);
+
+		// draw AABB as red rectangle
+		DrawAABB(renderer, r.x, r.y, r.w, r.h, SDL_Color{ 255, 0, 0, 255 });
 	}
-	
 	/*screenCoords = projectionMatrix * enemy1->pos;
 	rect.x = screenCoords.x - 10;
 	rect.y = screenCoords.y - 10;
