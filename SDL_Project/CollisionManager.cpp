@@ -55,23 +55,22 @@ void CollisionManager::CheckPlayerPlatform(Player* player, const std::vector<Pla
 
     for (auto plat : platforms)
     {
-        // Размеры платформы
+       
         float halfW = plat->width * 0.5f;
         float halfH = plat->height * 0.5f;
 
-        // AABB платформы
+       
         float left = plat->pos.x - halfW;
         float right = plat->pos.x + halfW;
         float bottom = plat->pos.y - halfH;
         float top = plat->pos.y + halfH;
 
-        // AABB игрока (квадрат вокруг игрока)
         float pxLeft = player->pos.x - player->radius;
         float pxRight = player->pos.x + player->radius;
         float pxBottom = player->pos.y - player->radius;
         float pxTop = player->pos.y + player->radius;
 
-        // Проверка пересечения AABB <-> AABB
+     
         bool intersects =
             pxRight > left &&
             pxLeft < right &&
@@ -81,7 +80,6 @@ void CollisionManager::CheckPlayerPlatform(Player* player, const std::vector<Pla
         if (!intersects)
             continue;
 
-        // --- Разрешение коллизии по глубине ---
         float overlapLeft = pxRight - left;
         float overlapRight = right - pxLeft;
         float overlapTop = top - pxBottom;
@@ -89,17 +87,17 @@ void CollisionManager::CheckPlayerPlatform(Player* player, const std::vector<Pla
 
         float minOverlap = std::min({ overlapLeft, overlapRight, overlapTop, overlapBottom });
 
-        // Сдвигаем игрока в сторону минимального проникновения
+      
         if (minOverlap == overlapTop)
         {
-            // Стоит сверху платформы
+         
             player->pos.y = top + player->radius;
             player->vel.y = 0;
             player->grounded = true;
         }
         else if (minOverlap == overlapBottom)
         {
-            // Удар снизу
+          
             player->pos.y = bottom - player->radius;
             player->vel.y = 0;
         }
