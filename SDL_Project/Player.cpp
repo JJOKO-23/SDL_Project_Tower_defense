@@ -11,7 +11,7 @@ Player::Player()
     acc = Vec3(0.0f, 0.0f, 0.0f);
 
     mass = 1.0f;
-    radius = 0.5f;
+    radius = 1.0f;
 
     Animation animation;
 }

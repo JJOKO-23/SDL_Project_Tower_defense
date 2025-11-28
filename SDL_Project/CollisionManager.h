@@ -14,6 +14,7 @@ public:
     CollisionManager(float minX, float maxX, float minY, float maxY);
     void CheckCollisions(std::vector<Entity*>& entities);
     void CheckPlayerPlatform(Player* player, const std::vector<Platform*>& platforms);
+    void ClampToWorld(Entity* obj);
 private:
     float worldMinX;
     float worldMaxX;
@@ -21,7 +22,7 @@ private:
     float worldMaxY;
     bool Intersects(Entity* a, Entity* b);
     void ResolveCollision(Entity* a, Entity* b);
-    void ClampToWorld(Entity* obj);
+    
     
 };
 

@@ -12,7 +12,7 @@ Scene2::Scene2(SDL_Window* sdlWindow_) :
 	, renderer(nullptr)
 	, back(nullptr)
 	, character(nullptr)
-	, enemy1(nullptr)
+	//, enemy1(nullptr)
 	
 	, player(nullptr)
 	, flappyScale(2.0f)
@@ -51,7 +51,7 @@ bool Scene2::OnCreate() {
 
 	player = new Player();
 	player->pos = Vec3(15, 8, 0);
-	player->radius = 1.0f;
+	//player->radius = 1.0f;
 	//player->radius = 0.5f;
 
 	// файликик можно менять мяу
@@ -78,11 +78,12 @@ bool Scene2::OnCreate() {
 	// скорость анимации
 	player->animation.SetFPS(12.0f);
 
-	enemy1 = new Entity();
-	enemy1->pos = Vec3(10.0f, 7.5f, 0.0f);
-	enemy1->radius = 0.5f;
+	//enemy1 = new Entity();
+	//enemy1->pos = Vec3(10.0f, 7.5f, 0.0f);
+	//enemy1->radius = 0.5f;
 	//character->SetImage("textures/idle.png", renderer);
-	Platform* ground = new Platform(Vec3(15, 1, 0), 30, 2);
+	Platform* ground = new Platform(Vec3(15, 3, 0), 6, 1);
+	ground->SetImage("textures/Stontex.png", renderer);
 	platforms.push_back(ground);
 
 	Platform* block = new Platform(Vec3(10, 8, 0), 4, 1);
@@ -139,8 +140,8 @@ void Scene2::OnDestroy() {
 	delete character;
 	character = nullptr;
 
-	delete enemy1;
-	enemy1 = nullptr;
+	//delete enemy1;
+	//enemy1 = nullptr;
 
 	delete player;
 	player = nullptr;
@@ -166,8 +167,8 @@ void Scene2::Update(const float deltaTime) {
 	player->Update(deltaTime);
 	//character->pos += character->vel * deltaTime;
 	collisionManager->CheckPlayerPlatform(player, platforms);
-	collisionManager->CheckCollisions(entities);
-
+	//collisionManager->CheckCollisions(entities);
+	collisionManager->ClampToWorld(player);
 	player->animation.Update(deltaTime);
 
 	//if (running) {
@@ -205,10 +206,11 @@ void Scene2::Render() const {
 	SDL_Texture* pFrame = player->animation.GetCurrentFrame();
 	screenCoords = projectionMatrix * player->pos;
 	SDL_FRect pr;
-	pr.x = screenCoords.x;
-	pr.y = screenCoords.y;
-	pr.w = 150;     // размер спрайта на экране
-	pr.h = 150;
+	pr.w = 100;     // размер спрайта на экране
+	pr.h = 100;
+	pr.x = screenCoords.x - pr.w * 0.5f;
+	pr.y = screenCoords.y - pr.h * 0.5f;
+
 
 	SDL_RenderTextureRotated(renderer, pFrame, nullptr, &pr, 0, nullptr, SDL_FLIP_NONE);
 
@@ -220,17 +222,17 @@ void Scene2::Render() const {
 		r.h = p->height * worldScale;
 		r.x = sc.x - r.w * 0.5f;
 		r.y = sc.y - r.h * 0.5f;
-		SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+		SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
 		SDL_RenderFillRect(renderer, &r);
 	}
 	
-	screenCoords = projectionMatrix * enemy1->pos;
+	/*screenCoords = projectionMatrix * enemy1->pos;
 	rect.x = screenCoords.x - 10;
 	rect.y = screenCoords.y - 10;
 	rect.w = 20;
 	rect.h = 20;
 	SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
-	SDL_RenderFillRect(renderer, &rect);
+	SDL_RenderFillRect(renderer, &rect);*/
 
 
 	// Update the screen
