@@ -82,8 +82,9 @@ bool Scene2::OnCreate() {
 	//enemy1->pos = Vec3(10.0f, 7.5f, 0.0f);
 	//enemy1->radius = 0.5f;
 	//character->SetImage("textures/idle.png", renderer);
-	Platform* ground = new Platform(Vec3(15, 3, 0), 6, 1);
+	Platform* ground = new Platform(Vec3(4.8, 2, 0), 10, 5);
 	ground->SetImage("textures/Stontex.png", renderer);
+
 	platforms.push_back(ground);
 
 	Platform* block = new Platform(Vec3(10, 8, 0), 4, 1);
@@ -216,13 +217,15 @@ void Scene2::Render() const {
 	SDL_Texture* pFrame = player->animation.GetCurrentFrame();
 	screenCoords = projectionMatrix * player->pos;
 	SDL_FRect pr;
-	pr.w = 100;     // размер спрайта на экране
-	pr.h = 100;
+	pr.w = 150;     // размер спрайта на экране
+	pr.h = 150;
 	pr.x = screenCoords.x - pr.w * 0.5f;
 	pr.y = screenCoords.y - pr.h * 0.5f;
 
 
 	SDL_RenderTextureRotated(renderer, pFrame, nullptr, &pr, 0, nullptr, SDL_FLIP_NONE);
+
+	// draw AABB as green rectangle
 	DrawAABB(renderer, pr.x, pr.y, pr.w, pr.h, SDL_Color{ 0, 255, 0, 255 });
 
 	
