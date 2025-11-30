@@ -5,6 +5,7 @@
 #include <iostream>
 #include "Entity.h"
 #include "Player.h"
+#include<SDL3/SDL_mixer.h>
 
 
 
@@ -113,22 +114,55 @@ bool Scene2::OnCreate() {
 	entities.push_back(player);
 	entities.push_back(enemy1);
 
-	SDL_Init(SDL_INIT_AUDIO);
-	MIX_Init();
 
-	mixer = MIX_CreateMixerDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, nullptr);
+	//**********************UUUUIII*********************
 
-	if (!mixer)
-	{
-		std::cout << "Failed to create mixer: %s\n", SDL_GetError();
-		return 0;
+	mainMenuBackground = IMG_LoadTexture(renderer, "textures/MAIN_SCREEN.png");
+	SDL_GetWindowSize(window, &w, &h);
+
+	mainMenuRect.x = 0;
+	mainMenuRect.y = 0;
+	mainMenuRect.w = w;
+	mainMenuRect.h = h;
+
+	
+	playButtonTexture = IMG_LoadTexture(renderer, "textures/UI_GAME.png");
+	
+	SDL_GetWindowSize(window, &w, &h);
+
+	playButtonRect.x = 320;
+	playButtonRect.y = 340;
+	playButtonRect.w = 420;
+	playButtonRect.h = 270;
+
+	mainMenuRect.x = (w / 2.0f) - (mainMenuRect.w / 2.0f);
+	mainMenuRect.y = (h / 2.0f) - (mainMenuRect.h / 2.0f);
+	
+	/////////////////
+
+	if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0) {
+		std::cout << "SDL audio init error: " << SDL_GetError() << std::endl;
 	}
 
-	//// Load and play music
-	MIX_Audio* Music = MIX_LoadAudio(mixer, "Audio/CrabRave.wav", true);
-	MIX_SetMasterGain(mixer, master_volume);
-	MIX_PlayAudio(mixer, Music);
-	MIX_DestroyAudio(Music);
+	if (!MIX_Init()) {
+		std::cout << "MIX_Init error: " << SDL_GetError() << std::endl;
+	}
+
+	mixer = MIX_CreateMixerDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, nullptr);
+	if (!mixer) {
+		std::cout << "Failed to create mixer: " << SDL_GetError() << std::endl;
+		return false;
+	}
+
+	// громкость (1.0f = 100%)
+	MIX_SetMasterGain(mixer, 0.2f);
+
+
+	// ====== LOAD GAME MUSIC ======
+	gameMusic = MIX_LoadAudio(mixer, "Audio/GAME_Audio.mp3", true);
+	if (!gameMusic) {
+		std::cout << "Failed to load GameMusic.wav: " << SDL_GetError() << std::endl;
+	}
 
 	collisionManager = new CollisionManager(0.0f, xAxis, 0.0f, yAxis);
 	return true;
@@ -142,11 +176,11 @@ void Scene2::OnDestroy() {
 	}
 
 	//// Turn off audio
-	if (mixer)
-	{
-		MIX_DestroyMixer(mixer);
-		MIX_Quit();
-	}
+	//if (mixer)
+	//{
+	//	MIX_DestroyMixer(mixer);
+	//	MIX_Quit();
+	//}
 
 	if (collisionManager) {
 		delete collisionManager;
@@ -166,11 +200,67 @@ void Scene2::OnDestroy() {
 	delete player;
 	player = nullptr;
 
+	if (menuMusic) {
+		MIX_DestroyAudio(menuMusic);
+		menuMusic = nullptr;
+	}
+
+	//if (gameMusic) {
+	//	MIX_DestroyAudio(gameMusic);
+	//	gameMusic = nullptr;
+	//}
+
+
 }
 
 void Scene2::HandleEvents(const SDL_Event& event)
 {
 	player->HandleInput(event);
+
+	if (showMainMenu)
+	{
+		if (event.type == SDL_EVENT_MOUSE_MOTION)
+		{
+			float mx = event.motion.x;
+			float my = event.motion.y;
+
+			bool inside =
+				mx >= playButtonRect.x && mx <= playButtonRect.x + playButtonRect.w &&
+				my >= playButtonRect.y && my <= playButtonRect.y + playButtonRect.h;
+
+			if (inside)
+			{
+				playHover = true;
+				playTargetScale = 1.15f;   // кнопка увеличивается
+			}
+			else
+			{
+				playHover = false;
+				playTargetScale = 1.0f;    // возвращается к нормальному размеру
+			}
+		}
+
+		if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
+		{
+			float mx = event.button.x;
+			float my = event.button.y;
+
+			if (mx >= playButtonRect.x && mx <= playButtonRect.x + playButtonRect.w &&
+				my >= playButtonRect.y && my <= playButtonRect.y + playButtonRect.h)
+			{
+				showMainMenu = false;
+				
+				if (gameMusic) {
+					MIX_PlayAudio(mixer, gameMusic);
+				}
+				
+			}
+		}
+
+		return;
+	}
+
+	
 } 
 
 void Scene2::Update(const float deltaTime) {
@@ -183,6 +273,15 @@ void Scene2::Update(const float deltaTime) {
 		character->ApplyForce(netForce); // gravity
 		character->Update(deltaTime);
 	}*/
+
+	if (showMainMenu)
+	{
+		// плавная интерполяция
+		float speed = 10.0f; // скорость анимации
+		playScale += (playTargetScale - playScale) * speed * deltaTime;
+
+		return;
+	}
 
 	player->Update(deltaTime);
 	//character->pos += character->vel * deltaTime;
@@ -200,13 +299,42 @@ void Scene2::Update(const float deltaTime) {
 	//	//character->Update(deltaTime);
 	//}
 
+
 }
 
 void Scene2::Render() const {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
 
+	if (showMainMenu)
+	{
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+		SDL_RenderClear(renderer);
 
+		// рисуем фон меню
+		if (mainMenuBackground)
+		{
+			SDL_RenderTexture(renderer, mainMenuBackground, nullptr, &mainMenuRect);
+		}
+
+		// ----------- HOVER SCALE -----------
+		// центр кнопки
+		float cx = playButtonRect.x + playButtonRect.w / 2.0f;
+		float cy = playButtonRect.y + playButtonRect.h / 2.0f;
+
+		// прямоугольник с учётом текущего масштаба (playScale)
+		SDL_FRect scaledRect;
+		scaledRect.w = playButtonRect.w * playScale;
+		scaledRect.h = playButtonRect.h * playScale;
+		scaledRect.x = cx - scaledRect.w / 2.0f;
+		scaledRect.y = cy - scaledRect.h / 2.0f;
+
+		// рисуем увеличенную / уменьшенную кнопку
+		SDL_RenderTexture(renderer, playButtonTexture, nullptr, &scaledRect);
+
+		SDL_RenderPresent(renderer);
+		return;
+	}
 
 
 	Vec3 screenCoords = projectionMatrix * back->pos;

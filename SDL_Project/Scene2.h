@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #ifndef SCENE2_H
 #define SCENE2_H
 #include <SDL3/SDL.h>
@@ -38,6 +38,32 @@ private:
 
 	MIX_Mixer* mixer;
 	float master_volume = 0.25f;
+
+	//UUUUIIIII
+
+	bool showMainMenu = true;
+
+	SDL_Texture* mainMenuBackground = nullptr;
+	SDL_Texture* playButtonTexture = nullptr;
+
+	SDL_FRect playButtonRect;
+	SDL_FRect mainMenuRect;
+
+	float loadingTime = 1.0f;
+
+
+	bool playHover = false;
+	float playScale = 1.0f;        // текущий масштаб
+	float playTargetScale = 1.2f;
+
+	// MUSIC
+	MIX_Audio* menuMusic = nullptr;
+	MIX_Audio* gameMusic = nullptr;
+
+	int menuMusicID = -1;
+	int gameMusicID = -1;
+
+
 public:
 	Scene2(SDL_Window* sdlWindow);
 	~Scene2();
