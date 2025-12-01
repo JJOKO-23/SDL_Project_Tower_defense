@@ -80,16 +80,28 @@ bool Scene2::OnCreate() {
 
 	enemy1 = new Entity();
 	enemy1->pos = Vec3(16.0f, 5.5f, 0.0f);
-	enemy1->radius = 0.5f;
+	enemy1->radius = 0.2f;
 	//character->SetImage("textures/idle.png", renderer);
-	Platform* ground = new Platform(Vec3(4.8, 2, 0), 10, 5);
-	ground->SetImage("textures/Stontex.png", renderer);
 
+	Platform* ground = new Platform(Vec3(5, 1, 0), 15, 2);
+	ground->SetImage("textures/grass.jpg", renderer);
 	platforms.push_back(ground);
 
-	Platform* block = new Platform(Vec3(10, 8, 0), 4, 1);
-	platforms.push_back(block);
+	Platform* ground2 = new Platform(Vec3(24, 1, 0), 15, 2);
+	ground2->SetImage("textures/grass.jpg", renderer);
+	platforms.push_back(ground2);
 
+
+
+	Platform* block = new Platform(Vec3(5, 4, 0), 4, 1);
+	platforms.push_back(block);
+	Platform* block2 = new Platform(Vec3(25, 5, 0), 4, 1);
+	platforms.push_back(block2);
+
+	Platform* block3 = new Platform(Vec3(10, 8, 0), 4, 1);
+	platforms.push_back(block3);
+	Platform* block4 = new Platform(Vec3(20, 8, 0), 4, 1);
+	platforms.push_back(block4);
 
 	entities.push_back(player);
 	enemies.push_back(enemy1);
@@ -157,7 +169,7 @@ void Scene2::HandleEvents(const SDL_Event& event)
 		event.button.button == SDL_BUTTON_LEFT)
 	{
 		
-		player->Attack(entities, projectiles);
+		player->Attack(enemies, projectiles);
 	}
 } 
 
@@ -318,7 +330,7 @@ void Scene2::Render() const {
 	rect.y = screenCoords.y - 10;
 	rect.w = 20;
 	rect.h = 20;
-	SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 	SDL_RenderFillRect(renderer, &rect);
 
 
