@@ -7,7 +7,7 @@
 #include <SDL3/SDL.h>
 #include <vector>
 
-class Projectile; 
+class Projectile;
 class Entity;
 
 class Player : public Entity {
@@ -23,6 +23,12 @@ public:
     bool onPlatform;
     float width = 1.0f;
     float height = 1.8f;
+    bool facingRight = true;
+
+    bool meleeMode = true;     
+    float meleeRange = 1.5f;  
+    float projectileCooldown = 0.25f;
+    float projectileTimer = 0.0f;
 
     Animation idleAnim;
     Animation walkAnim;
