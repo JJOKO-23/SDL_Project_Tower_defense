@@ -283,7 +283,7 @@ void Scene2::HandleEvents(const SDL_Event& event)
 } 
 
 	
-} 
+
 
 void Scene2::Update(const float deltaTime) {
 	/// Physics goes here	
@@ -427,24 +427,18 @@ void Scene2::Render() const {
 	SDL_FRect pr;
 	pr.w = 150;     // размер спрайта на экране
 	pr.h = 150;
-
-	SDL_FlipMode flip = player->facingRight ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
-
-	SDL_RenderTextureRotated(renderer, pFrame, nullptr, &pr, 0, nullptr, flip);;
-	
-	for (auto p : platforms) {
 	pr.x = screenCoords.x - pr.w * 0.5f;
 	pr.y = screenCoords.y - pr.h * 0.5f;
 
 	SDL_FlipMode flip = player->facingRight ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
 
-	SDL_RenderTextureRotated(renderer, pFrame, nullptr, &pr, 0, nullptr, flip);
-	
-
+	SDL_RenderTextureRotated(renderer, pFrame, nullptr, &pr, 0, nullptr, flip);;
 	// draw AABB as green rectangle
 	DrawAABB(renderer, pr.x, pr.y, pr.w, pr.h, SDL_Color{ 0, 255, 0, 255 });
 
 	
+	
+
 	
 	float pixelsPerUnitX = 1280 / xAxis;
 	float pixelsPerUnitY = 720 / yAxis;
@@ -477,8 +471,8 @@ void Scene2::Render() const {
 		SDL_FRect r;
 		r.x = sc.x;
 		r.y = sc.y;
-		r.w = 20; // длина линии
-		r.h = 4;  // толщина
+		r.w = 20; 
+		r.h = 4;  
 
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 		SDL_RenderFillRect(renderer, &r);
