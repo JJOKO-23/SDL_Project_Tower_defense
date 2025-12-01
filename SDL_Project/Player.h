@@ -12,13 +12,19 @@ private:
     bool attacking;
     float attackCooldown;
     float attackTimer;
-    
+
 
 public:
     bool grounded;
-	bool onPlatform;
+    bool onPlatform;
     float width = 1.0f;
     float height = 1.8f;
+    bool facingRight = true;
+
+    Animation idleAnim;
+    Animation walkAnim;
+
+    Animation* currentAnim = nullptr;
 
     Player();
     ~Player() = default;

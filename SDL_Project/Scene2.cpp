@@ -222,8 +222,10 @@ void Scene2::Render() const {
 	pr.x = screenCoords.x - pr.w * 0.5f;
 	pr.y = screenCoords.y - pr.h * 0.5f;
 
+	SDL_FlipMode flip = player->facingRight ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
 
-	SDL_RenderTextureRotated(renderer, pFrame, nullptr, &pr, 0, nullptr, SDL_FLIP_NONE);
+	SDL_RenderTextureRotated(renderer, pFrame, nullptr, &pr, 0, nullptr, flip);
+	
 
 	// draw AABB as green rectangle
 	DrawAABB(renderer, pr.x, pr.y, pr.w, pr.h, SDL_Color{ 0, 255, 0, 255 });
