@@ -5,6 +5,10 @@
 #include "Entity.h"
 #include "Animation.h"
 #include <SDL3/SDL.h>
+#include <vector>
+
+class Projectile; 
+class Entity;
 
 class Player : public Entity {
 private:
@@ -12,14 +16,13 @@ private:
     bool attacking;
     float attackCooldown;
     float attackTimer;
-   
+
 
 public:
     bool grounded;
-	bool onPlatform;
+    bool onPlatform;
     float width = 1.0f;
     float height = 1.8f;
-    bool facingRight = true;
 
     Animation idleAnim;
     Animation walkAnim;
@@ -31,7 +34,8 @@ public:
 
     void HandleInput(const SDL_Event& event);
     void Update(float deltaTime) override;
-    void Attack();
+    void Attack(std::vector<Entity*>& enemies,
+        std::vector<Projectile*>& projectiles);
 };
 
 #endif

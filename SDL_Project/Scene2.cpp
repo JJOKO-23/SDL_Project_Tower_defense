@@ -53,7 +53,7 @@ bool Scene2::OnCreate() {
 
 	player = new Player();
 	player->pos = Vec3(15, 8, 0);
-	player->radius = 1.0f;
+	//player->radius = 1.0f;
 	//player->radius = 0.5f;
 
 	#pragma region PlayerIdleAnimation
@@ -101,18 +101,32 @@ bool Scene2::OnCreate() {
 	player->animation.SetFPS(17.0f);
 
 	enemy1 = new Entity();
-	enemy1->pos = Vec3(10.0f, 7.5f, 0.0f);
-	enemy1->radius = 0.5f;
+	enemy1->pos = Vec3(16.0f, 5.5f, 0.0f);
+	enemy1->radius = 0.2f;
 	//character->SetImage("textures/idle.png", renderer);
-	Platform* ground = new Platform(Vec3(15, 1, 0), 30, 2);
+
+	Platform* ground = new Platform(Vec3(5, 1, 0), 15, 2);
+	ground->SetImage("textures/grass.jpg", renderer);
 	platforms.push_back(ground);
 
-	Platform* block = new Platform(Vec3(10, 8, 0), 4, 1);
-	platforms.push_back(block);
+	Platform* ground2 = new Platform(Vec3(24, 1, 0), 15, 2);
+	ground2->SetImage("textures/grass.jpg", renderer);
+	platforms.push_back(ground2);
 
+
+
+	Platform* block = new Platform(Vec3(5, 4, 0), 4, 1);
+	platforms.push_back(block);
+	Platform* block2 = new Platform(Vec3(25, 5, 0), 4, 1);
+	platforms.push_back(block2);
+
+	Platform* block3 = new Platform(Vec3(10, 8, 0), 4, 1);
+	platforms.push_back(block3);
+	Platform* block4 = new Platform(Vec3(20, 8, 0), 4, 1);
+	platforms.push_back(block4);
 
 	entities.push_back(player);
-	entities.push_back(enemy1);
+	enemies.push_back(enemy1);
 
 
 	//**********************UUUUIII*********************
@@ -194,8 +208,8 @@ void Scene2::OnDestroy() {
 	delete character;
 	character = nullptr;
 
-	delete enemy1;
-	enemy1 = nullptr;
+	//delete enemy1;
+	//enemy1 = nullptr;
 
 	delete player;
 	player = nullptr;
@@ -260,6 +274,14 @@ void Scene2::HandleEvents(const SDL_Event& event)
 		return;
 	}
 
+	if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN &&
+		event.button.button == SDL_BUTTON_LEFT)
+	{
+		
+		player->Attack(enemies, projectiles);
+	}
+} 
+
 	
 } 
 
@@ -289,19 +311,68 @@ void Scene2::Update(const float deltaTime) {
 	collisionManager->CheckCollisions(entities);
 
 	
+	//collisionManager->CheckCollisions(entities);
+	collisionManager->ClampToWorld(player);
+	player->animation.Update(deltaTime);
 
-	//if (running) {
-	//	Vec3 gravity = Vec3(0.0f, -9.8f, 0.0f);
-	//	Vec3 drag = -0.2f * character->vel;
-	//	Vec3 wind = Vec3(-15.0f, 0.0f, 0.0f);
-	//	Vec3 netForce = gravity + drag + wind;
-	//	//character->ApplyForce(netForce);
-	//	//character->Update(deltaTime);
-	//}
+	//projectiles update START
 
 
+	for (int i = projectiles.size() - 1; i >= 0; i--)
+	{
+		projectiles[i]->Update(deltaTime);
+
+		bool destroyed = false;
+
+		// check collision with enemies
+		for (int e = enemies.size() - 1; e >= 0; e--)
+		{
+			float dx = fabs(projectiles[i]->pos.x - enemies[e]->pos.x);
+			float dy = fabs(projectiles[i]->pos.y - enemies[e]->pos.y);
+
+			if (dx < 1.0f && dy < 1.0f)
+			{
+				delete enemies[e];
+				enemies.erase(enemies.begin() + e);
+
+				delete projectiles[i];
+				projectiles.erase(projectiles.begin() + i);
+
+				destroyed = true;
+				break;   
+			}
+		}
+
+		
+		if (destroyed)
+			continue;
+
+
+		// delete if off screen
+		if (projectiles[i]->pos.x < 0 || projectiles[i]->pos.x > xAxis)
+		{
+			delete projectiles[i];
+			projectiles.erase(projectiles.begin() + i);
+			continue;
+		}
+	}
+	//projectiles update END
 }
 
+	
+
+
+void DrawAABB(SDL_Renderer* renderer, float x, float y, float w, float h, SDL_Color color) {
+	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+
+	SDL_FRect rect;
+	rect.x = x;
+	rect.y = y;
+	rect.w = w;
+	rect.h = h;
+
+	SDL_RenderRect(renderer, &rect);
+}
 void Scene2::Render() const {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
@@ -354,8 +425,6 @@ void Scene2::Render() const {
 	SDL_Texture* pFrame = player->currentAnim->GetCurrentFrame();
 	screenCoords = projectionMatrix * player->pos;
 	SDL_FRect pr;
-	pr.x = screenCoords.x;
-	pr.y = screenCoords.y;
 	pr.w = 150;     // размер спрайта на экране
 	pr.h = 150;
 
@@ -364,23 +433,63 @@ void Scene2::Render() const {
 	SDL_RenderTextureRotated(renderer, pFrame, nullptr, &pr, 0, nullptr, flip);;
 	
 	for (auto p : platforms) {
+	pr.x = screenCoords.x - pr.w * 0.5f;
+	pr.y = screenCoords.y - pr.h * 0.5f;
+
+	SDL_FlipMode flip = player->facingRight ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
+
+	SDL_RenderTextureRotated(renderer, pFrame, nullptr, &pr, 0, nullptr, flip);
+	
+
+	// draw AABB as green rectangle
+	DrawAABB(renderer, pr.x, pr.y, pr.w, pr.h, SDL_Color{ 0, 255, 0, 255 });
+
+	
+	
+	float pixelsPerUnitX = 1280 / xAxis;
+	float pixelsPerUnitY = 720 / yAxis;
+
+	for (auto p : platforms)
+	{
 		Vec3 sc = projectionMatrix * p->pos;
+
 		SDL_FRect r;
-		
-		r.w = p->width * worldScale;
-		r.h = p->height * worldScale;
+		r.w = p->width * pixelsPerUnitX;
+		r.h = p->height * pixelsPerUnitY;
+
 		r.x = sc.x - r.w * 0.5f;
 		r.y = sc.y - r.h * 0.5f;
-		SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+
+		SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+		SDL_RenderFillRect(renderer, &r);
+
+		// draw texture
+		SDL_RenderTexture(renderer, p->texture, nullptr, &r);
+
+		// draw AABB as red rectangle
+		DrawAABB(renderer, r.x, r.y, r.w, r.h, SDL_Color{ 255, 0, 0, 255 });
+	}
+
+	for (auto p : projectiles)
+	{
+		Vec3 sc = projectionMatrix * p->pos;
+
+		SDL_FRect r;
+		r.x = sc.x;
+		r.y = sc.y;
+		r.w = 20; // длина линии
+		r.h = 4;  // толщина
+
+		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 		SDL_RenderFillRect(renderer, &r);
 	}
-	
+
 	screenCoords = projectionMatrix * enemy1->pos;
 	rect.x = screenCoords.x - 10;
 	rect.y = screenCoords.y - 10;
 	rect.w = 20;
 	rect.h = 20;
-	SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 	SDL_RenderFillRect(renderer, &rect);
 
 

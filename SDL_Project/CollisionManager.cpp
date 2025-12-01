@@ -49,35 +49,67 @@ void CollisionManager::CheckCollisions(std::vector<Entity*>& entities) {
         }
     }
 }
-
 void CollisionManager::CheckPlayerPlatform(Player* player, const std::vector<Platform*>& platforms)
 {
+    player->grounded = false;
+
     for (auto plat : platforms)
     {
-		// borders of the platform
-        float left = plat->pos.x - plat->width / 2;
-        float right = plat->pos.x + plat->width / 2;
-        float bottom = plat->pos.y;
-        float top = plat->pos.y + plat->height;
+       
+        float halfW = plat->width * 0.5f;
+        float halfH = plat->height * 0.5f;
 
-        
-        bool xOverlap = (player->pos.x > left && player->pos.x < right);
+       
+        float left = plat->pos.x - halfW;
+        float right = plat->pos.x + halfW;
+        float bottom = plat->pos.y - halfH;
+        float top = plat->pos.y + halfH;
 
-		// fall on the platform
-        bool yHit = (player->pos.y - player->radius <= top &&
-            player->pos.y - player->radius >= top - 0.3f &&
-            player->vel.y < 0);
+        float pxLeft = player->pos.x - player->radius;
+        float pxRight = player->pos.x + player->radius;
+        float pxBottom = player->pos.y - player->radius;
+        float pxTop = player->pos.y + player->radius;
 
-        if (xOverlap && yHit)
+     
+        bool intersects =
+            pxRight > left &&
+            pxLeft < right &&
+            pxTop > bottom &&
+            pxBottom < top;
+
+        if (!intersects)
+            continue;
+
+        float overlapLeft = pxRight - left;
+        float overlapRight = right - pxLeft;
+        float overlapTop = top - pxBottom;
+        float overlapBottom = pxTop - bottom;
+
+        float minOverlap = std::min({ overlapLeft, overlapRight, overlapTop, overlapBottom });
+
+      
+        if (minOverlap == overlapTop)
         {
-			/// player on platform
+         
             player->pos.y = top + player->radius;
             player->vel.y = 0;
             player->grounded = true;
         }
+        else if (minOverlap == overlapBottom)
+        {
+          
+            player->pos.y = bottom - player->radius;
+            player->vel.y = 0;
+        }
+        else if (minOverlap == overlapLeft)
+        {
+            player->pos.x = left - player->radius;
+            player->vel.x = 0;
+        }
+        else if (minOverlap == overlapRight)
+        {
+            player->pos.x = right + player->radius;
+            player->vel.x = 0;
+        }
     }
-
-    
-    if (!player->onPlatform)
-        player->grounded = false;
 }

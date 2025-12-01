@@ -12,10 +12,11 @@ private:
 	// Keep these private as we should only build them in the setImage method
 	// I do listen to Scott sometimes...
 	SDL_Surface* surface; // Used to get the width and height of the image
-	SDL_Texture* texture; // Used to render the image
+	 // Used to render the image
 
 public:
 	float angleDeg;
+	SDL_Texture* texture;
 	Vec3 pos;
 	Vec3 vel;
 	Vec3 acc;

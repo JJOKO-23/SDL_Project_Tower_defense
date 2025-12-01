@@ -29,7 +29,7 @@ void Entity::SetImage(const char* filename, SDL_Renderer* renderer) {
 }
 
 //ИСЛЛАААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААМ
-// вот это анимация  не трогай пжшка
+// вот это анимация  не трогай пжшка // ok 
 void Entity::AddAnimationFrame(const char* filename, SDL_Renderer* renderer) {
 	SDL_Surface* surf = IMG_Load(filename);
 	if (!surf) {
