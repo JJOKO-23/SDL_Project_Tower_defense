@@ -5,6 +5,10 @@
 #include "Entity.h"
 #include "Animation.h"
 #include <SDL3/SDL.h>
+#include <vector>
+
+class Projectile; 
+class Entity;
 
 class Player : public Entity {
 private:
@@ -21,6 +25,11 @@ public:
     float height = 1.8f;
     bool facingRight = true;
 
+    bool meleeMode = true;     // true = ближн€€ атака, false = дальн€€
+    float meleeRange = 1.5f;   // радиус ближнего удара
+    float projectileCooldown = 0.25f;
+    float projectileTimer = 0.0f;
+
     Animation idleAnim;
     Animation walkAnim;
 
@@ -31,7 +40,8 @@ public:
 
     void HandleInput(const SDL_Event& event);
     void Update(float deltaTime) override;
-    void Attack();
+    void Attack(std::vector<Entity*>& enemies,
+        std::vector<Projectile*>& projectiles);
 };
 
 #endif

@@ -12,7 +12,7 @@ Scene2::Scene2(SDL_Window* sdlWindow_) :
 	, renderer(nullptr)
 	, back(nullptr)
 	, character(nullptr)
-	//, enemy1(nullptr)
+	, enemy1(nullptr)
 	
 	, player(nullptr)
 	, flappyScale(2.0f)
@@ -78,9 +78,9 @@ bool Scene2::OnCreate() {
 	// скорость анимации
 	player->animation.SetFPS(12.0f);
 
-	//enemy1 = new Entity();
-	//enemy1->pos = Vec3(10.0f, 7.5f, 0.0f);
-	//enemy1->radius = 0.5f;
+	enemy1 = new Entity();
+	enemy1->pos = Vec3(16.0f, 5.5f, 0.0f);
+	enemy1->radius = 0.5f;
 	//character->SetImage("textures/idle.png", renderer);
 	Platform* ground = new Platform(Vec3(4.8, 2, 0), 10, 5);
 	ground->SetImage("textures/Stontex.png", renderer);
@@ -92,7 +92,7 @@ bool Scene2::OnCreate() {
 
 
 	entities.push_back(player);
-	entities.push_back(enemy1);
+	enemies.push_back(enemy1);
 
 	SDL_Init(SDL_INIT_AUDIO);
 	MIX_Init();
@@ -152,6 +152,13 @@ void Scene2::OnDestroy() {
 void Scene2::HandleEvents(const SDL_Event& event)
 {
 	player->HandleInput(event);
+
+	if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN &&
+		event.button.button == SDL_BUTTON_LEFT)
+	{
+		
+		player->Attack(entities, projectiles);
+	}
 } 
 
 void Scene2::Update(const float deltaTime) {
@@ -172,16 +179,52 @@ void Scene2::Update(const float deltaTime) {
 	collisionManager->ClampToWorld(player);
 	player->animation.Update(deltaTime);
 
-	//if (running) {
-	//	Vec3 gravity = Vec3(0.0f, -9.8f, 0.0f);
-	//	Vec3 drag = -0.2f * character->vel;
-	//	Vec3 wind = Vec3(-15.0f, 0.0f, 0.0f);
-	//	Vec3 netForce = gravity + drag + wind;
-	//	//character->ApplyForce(netForce);
-	//	//character->Update(deltaTime);
-	//}
+	//projectiles update START
 
+
+	for (int i = projectiles.size() - 1; i >= 0; i--)
+	{
+		projectiles[i]->Update(deltaTime);
+
+		bool destroyed = false;
+
+		// check collision with enemies
+		for (int e = enemies.size() - 1; e >= 0; e--)
+		{
+			float dx = fabs(projectiles[i]->pos.x - enemies[e]->pos.x);
+			float dy = fabs(projectiles[i]->pos.y - enemies[e]->pos.y);
+
+			if (dx < 1.0f && dy < 1.0f)
+			{
+				delete enemies[e];
+				enemies.erase(enemies.begin() + e);
+
+				delete projectiles[i];
+				projectiles.erase(projectiles.begin() + i);
+
+				destroyed = true;
+				break;   
+			}
+		}
+
+		
+		if (destroyed)
+			continue;
+
+		// delete if off screen
+		if (projectiles[i]->pos.x < 0 || projectiles[i]->pos.x > xAxis)
+		{
+			delete projectiles[i];
+			projectiles.erase(projectiles.begin() + i);
+			continue;
+		}
+	}
+	//projectiles update END
 }
+
+	
+
+
 void DrawAABB(SDL_Renderer* renderer, float x, float y, float w, float h, SDL_Color color) {
 	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 
@@ -255,13 +298,28 @@ void Scene2::Render() const {
 		// draw AABB as red rectangle
 		DrawAABB(renderer, r.x, r.y, r.w, r.h, SDL_Color{ 255, 0, 0, 255 });
 	}
-	/*screenCoords = projectionMatrix * enemy1->pos;
+
+	for (auto p : projectiles)
+	{
+		Vec3 sc = projectionMatrix * p->pos;
+
+		SDL_FRect r;
+		r.x = sc.x;
+		r.y = sc.y;
+		r.w = 20; // длина линии
+		r.h = 4;  // толщина
+
+		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+		SDL_RenderFillRect(renderer, &r);
+	}
+
+	screenCoords = projectionMatrix * enemy1->pos;
 	rect.x = screenCoords.x - 10;
 	rect.y = screenCoords.y - 10;
 	rect.w = 20;
 	rect.h = 20;
 	SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
-	SDL_RenderFillRect(renderer, &rect);*/
+	SDL_RenderFillRect(renderer, &rect);
 
 
 	// Update the screen

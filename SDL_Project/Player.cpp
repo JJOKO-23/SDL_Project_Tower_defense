@@ -1,5 +1,6 @@
-
+﻿
 #include "Player.h"
+#include "Projectile.h"
 #include <iostream>
 
 Player::Player()
@@ -12,9 +13,9 @@ Player::Player()
     acc = Vec3(0.0f, 0.0f, 0.0f);
 
     mass = 1.0f;
-    radius = 0.5f;
+    radius = 1.0f;
 
-    Animation animation;
+    //Animation animation;
 
     currentAnim = &idleAnim;
 }
@@ -42,6 +43,10 @@ void Player::HandleInput(const SDL_Event& event)
         case SDL_SCANCODE_D:
             vel.x = moveSpeed;
             facingRight = true;
+            break;
+
+        case SDL_SCANCODE_Q:
+            meleeMode = !meleeMode; 
             break;
 
         default:
@@ -75,7 +80,7 @@ void Player::HandleInput(const SDL_Event& event)
 
 void Player::Update(float deltaTime)
 {
-
+    projectileTimer -= deltaTime;
     vel.y -= 25.0f * deltaTime;
 
 
@@ -92,4 +97,39 @@ void Player::Update(float deltaTime)
         currentAnim = &idleAnim;
 
     currentAnim->Update(deltaTime);
+}
+
+void Player::Attack(std::vector<Entity*>& enemies,
+    std::vector<Projectile*>& projectiles)
+{
+   
+
+    if (meleeMode)
+    {
+        
+        float dir = facingRight ? 1.0f : -1.0f;
+        float attackX = pos.x + dir * meleeRange;
+
+        for (int i = enemies.size() - 1; i >= 0; i--)
+        {
+            float dx = fabs(enemies[i]->pos.x - attackX);
+            float dy = fabs(enemies[i]->pos.y - pos.y);
+
+            if (dx < 1.0f && dy < 1.0f) {
+                delete enemies[i];
+                enemies.erase(enemies.begin() + i);
+            }
+        }
+    }
+    else
+    {
+      
+        if (projectileTimer <= 0.0f)
+        {
+            Projectile* p = new Projectile(pos, facingRight);
+            projectiles.push_back(p);
+
+            projectileTimer = projectileCooldown;
+        }
+    }
 }

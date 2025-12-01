@@ -10,7 +10,7 @@
 #include "Platform.h"
 #include "CollisionManager.h"
 #include "Entity.h"
-
+#include "Projectile.h"
 #include <SDL3/SDL_mixer.h>
 
 using namespace MATH;
@@ -20,7 +20,9 @@ private:
 	float xAxis;
 	float yAxis;
 	float worldScale = 20.0f;
+
 	
+	std::vector<Projectile*> projectiles;
 	Matrix4 projectionMatrix;
 	SDL_Renderer* renderer;
 
@@ -29,9 +31,12 @@ private:
 	Entity* enemy1;
 	Player* player;
 
+	std::vector<Entity*> enemies;
 	
 	std::vector<Entity*> entities;
 	std::vector<Platform*> platforms;
+	
+	
 	CollisionManager* collisionManager;
 	bool running = 0;
 
@@ -40,6 +45,8 @@ private:
 	MIX_Mixer* mixer;
 	float master_volume = 0.25f;
 public:
+	
+	
 	Scene2(SDL_Window* sdlWindow);
 	~Scene2();
 	bool OnCreate() override;
