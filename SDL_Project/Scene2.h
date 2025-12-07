@@ -12,6 +12,8 @@
 #include "Entity.h"
 #include "Projectile.h"
 #include <SDL3/SDL_mixer.h>
+#include "WaveSystem.h"
+
 
 using namespace MATH;
 class Scene2 : public Scene {
@@ -20,15 +22,23 @@ private:
 	float xAxis;
 	float yAxis;
 	float worldScale = 20.0f;
-
 	
+
+	WaveSystem* waves = nullptr;
+	Tower* tower = nullptr;
+	
+	float playerHP = 100.0f;
+	float playerMaxHP = 100.0f;
+	float playerDamage = 20.0f;
+	
+
 	std::vector<Projectile*> projectiles;
 	Matrix4 projectionMatrix;
 	SDL_Renderer* renderer;
 
 	Entity* back;
 	Entity* character; 
-	Entity* enemy1;
+	Enemy* enemy1;
 	Player* player;
 
 	std::vector<Entity*> enemies;

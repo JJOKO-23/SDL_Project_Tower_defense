@@ -8,6 +8,7 @@
 #include "Enemy.h"
 #include "Tower.h"
 #include "Platform.h"
+#include "Entity.h"
 
 class CollisionManager {
 public:
@@ -15,6 +16,7 @@ public:
     void CheckCollisions(std::vector<Entity*>& entities);
     void CheckPlayerPlatform(Player* player, const std::vector<Platform*>& platforms);
     void ClampToWorld(Entity* obj);
+
 private:
     float worldMinX;
     float worldMaxX;
@@ -22,6 +24,8 @@ private:
     float worldMaxY;
     bool Intersects(Entity* a, Entity* b);
     void ResolveCollision(Entity* a, Entity* b);
+    void ResolvePush(Entity* a, Entity* b);
+
     
     
 };

@@ -56,6 +56,16 @@ bool Scene2::OnCreate() {
 	//player->radius = 1.0f;
 	//player->radius = 0.5f;
 
+
+
+	tower = new Tower(300.0f);
+	tower->pos = Vec3(15, 2, 0);
+	
+	waves = new WaveSystem();
+	waves->Init(tower);
+
+
+
 	#pragma region PlayerIdleAnimation
 		player->idleAnim.AddFrame(IMG_LoadTexture(renderer, "textures/IDLE_000.png"));
 		player->idleAnim.AddFrame(IMG_LoadTexture(renderer, "textures/IDLE_001.png"));
@@ -100,9 +110,7 @@ bool Scene2::OnCreate() {
 	// скорость анимации
 	player->animation.SetFPS(17.0f);
 
-	enemy1 = new Entity();
-	enemy1->pos = Vec3(16.0f, 5.5f, 0.0f);
-	enemy1->radius = 0.2f;
+	
 	//character->SetImage("textures/idle.png", renderer);
 
 	Platform* ground = new Platform(Vec3(5, 1, 0), 15, 2);
@@ -126,7 +134,7 @@ bool Scene2::OnCreate() {
 	platforms.push_back(block4);
 
 	entities.push_back(player);
-	enemies.push_back(enemy1);
+
 
 
 	//**********************UUUUIII*********************
@@ -278,7 +286,8 @@ void Scene2::HandleEvents(const SDL_Event& event)
 		event.button.button == SDL_BUTTON_LEFT)
 	{
 		
-		player->Attack(enemies, projectiles);
+		player->Attack((std::vector<Entity*>&)waves->enemies, projectiles);
+
 	}
 } 
 
@@ -306,17 +315,20 @@ void Scene2::Update(const float deltaTime) {
 	}
 
 	player->Update(deltaTime);
+	waves->Update(deltaTime, player->pos, playerHP);
 	//character->pos += character->vel * deltaTime;
 	collisionManager->CheckPlayerPlatform(player, platforms);
 	collisionManager->CheckCollisions(entities);
-
+	
 	
 	//collisionManager->CheckCollisions(entities);
 	collisionManager->ClampToWorld(player);
 	player->animation.Update(deltaTime);
 
-	//projectiles update START
 
+
+
+	//projectiles update START
 
 	for (int i = projectiles.size() - 1; i >= 0; i--)
 	{
@@ -324,36 +336,40 @@ void Scene2::Update(const float deltaTime) {
 
 		bool destroyed = false;
 
-		// check collision with enemies
-		for (int e = enemies.size() - 1; e >= 0; e--)
+		
+		for (int e = (int)waves->enemies.size() - 1; e >= 0; e--)
 		{
-			float dx = fabs(projectiles[i]->pos.x - enemies[e]->pos.x);
-			float dy = fabs(projectiles[i]->pos.y - enemies[e]->pos.y);
+			float dx = fabs(projectiles[i]->pos.x - waves->enemies[e]->pos.x);
+			float dy = fabs(projectiles[i]->pos.y - waves->enemies[e]->pos.y);
 
 			if (dx < 1.0f && dy < 1.0f)
 			{
-				delete enemies[e];
-				enemies.erase(enemies.begin() + e);
+				
+				waves->enemies[e]->TakeDamage(playerDamage);
+
+				
+				if (waves->enemies[e]->IsDead())
+				{
+					delete waves->enemies[e];
+					waves->enemies.erase(waves->enemies.begin() + e);
+				}
 
 				delete projectiles[i];
 				projectiles.erase(projectiles.begin() + i);
 
 				destroyed = true;
-				break;   
+				break;
 			}
 		}
 
-		
 		if (destroyed)
 			continue;
 
-
-		// delete if off screen
+		
 		if (projectiles[i]->pos.x < 0 || projectiles[i]->pos.x > xAxis)
 		{
 			delete projectiles[i];
 			projectiles.erase(projectiles.begin() + i);
-			continue;
 		}
 	}
 	//projectiles update END
@@ -376,7 +392,7 @@ void DrawAABB(SDL_Renderer* renderer, float x, float y, float w, float h, SDL_Co
 void Scene2::Render() const {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
-
+	//UI RENDERING
 	if (showMainMenu)
 	{
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -406,8 +422,9 @@ void Scene2::Render() const {
 		SDL_RenderPresent(renderer);
 		return;
 	}
+	//UI RENDERING END
 
-
+	// Render the player here
 	Vec3 screenCoords = projectionMatrix * back->pos;
 	SDL_FRect rect;
 	rect.x = screenCoords.x;
@@ -435,14 +452,25 @@ void Scene2::Render() const {
 	SDL_RenderTextureRotated(renderer, pFrame, nullptr, &pr, 0, nullptr, flip);;
 	// draw AABB as green rectangle
 	DrawAABB(renderer, pr.x, pr.y, pr.w, pr.h, SDL_Color{ 0, 255, 0, 255 });
+	//Player HP bar render
+	Vec3 psc = projectionMatrix * player->pos;
 
+	float hpRatio = playerHP / playerMaxHP;
+
+	SDL_FRect hpBg = { psc.x - 30, psc.y - 90, 60, 6 };
+	SDL_SetRenderDrawColor(renderer, 80, 80, 80, 255);
+	SDL_RenderFillRect(renderer, &hpBg);
+
+	SDL_FRect hpFill = { psc.x - 30, psc.y - 90, 60 * hpRatio, 6 };
+	SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+	SDL_RenderFillRect(renderer, &hpFill);
 	
 	
 
 	
 	float pixelsPerUnitX = 1280 / xAxis;
 	float pixelsPerUnitY = 720 / yAxis;
-
+	// platforms render
 	for (auto p : platforms)
 	{
 		Vec3 sc = projectionMatrix * p->pos;
@@ -463,7 +491,7 @@ void Scene2::Render() const {
 		// draw AABB as red rectangle
 		DrawAABB(renderer, r.x, r.y, r.w, r.h, SDL_Color{ 255, 0, 0, 255 });
 	}
-
+	// projectiles render			
 	for (auto p : projectiles)
 	{
 		Vec3 sc = projectionMatrix * p->pos;
@@ -478,13 +506,45 @@ void Scene2::Render() const {
 		SDL_RenderFillRect(renderer, &r);
 	}
 
-	screenCoords = projectionMatrix * enemy1->pos;
-	rect.x = screenCoords.x - 10;
-	rect.y = screenCoords.y - 10;
-	rect.w = 20;
-	rect.h = 20;
-	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-	SDL_RenderFillRect(renderer, &rect);
+	//wawes render enemies
+	for (auto e : waves->enemies) {
+		Vec3 sc = projectionMatrix * e->pos;
+
+		SDL_FRect r;
+		r.x = sc.x - 10;
+		r.y = sc.y - 10;
+		r.w = 20;
+		r.h = 20;
+
+		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+		SDL_RenderFillRect(renderer, &r);
+
+		// HP BAR
+		float hpRatio = e->GetHP() / e->GetMaxHP();
+		SDL_FRect hpBar;
+		hpBar.x = r.x;
+		hpBar.y = r.y - 8;
+		hpBar.w = 20 * hpRatio;
+		hpBar.h = 4;
+
+		SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+		SDL_RenderFillRect(renderer, &hpBar);
+	}
+	// tower render
+	Vec3 tpos = projectionMatrix * tower->pos;
+
+	SDL_FRect towerRect = { tpos.x - 15, tpos.y - 15, 30, 30 };
+	SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+	SDL_RenderFillRect(renderer, &towerRect);
+
+	// money bar
+	float mRatio = tower->GetMoney() / tower->GetMaxMoney();
+	SDL_FRect moneyBar = { towerRect.x, towerRect.y - 6, 30 * mRatio, 4 };
+
+	SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+	SDL_RenderFillRect(renderer, &moneyBar);
+
+
 
 
 	// Update the screen

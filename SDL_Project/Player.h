@@ -24,7 +24,7 @@ public:
     float width = 1.0f;
     float height = 1.8f;
     bool facingRight = true;
-
+    int playerDamage = 20;
     bool meleeMode = true;     
     float meleeRange = 1.5f;  
     float projectileCooldown = 0.25f;

@@ -1,0 +1,116 @@
+#include "WaveSystem.h"
+
+#include <cmath>
+
+void WaveSystem::Init(Tower* t) {
+    tower = t;
+    StartWave();
+}
+
+void WaveSystem::StartWave() {
+    CleanEnemies();
+
+    currentWave++;
+
+    if (currentWave > maxWaves) {
+        gameWon = true;
+        return;
+    }
+
+    int baseCount = 5;
+    int enemyCount = baseCount + (currentWave - 1);
+
+    float hpBoost = 1.0f + (currentWave - 1) * 0.5f;
+    float dmgBoost = 1.0f + (currentWave - 1) * 0.5f;
+
+    for (int i = 0; i < enemyCount; i++) {
+        Enemy* e = new Enemy(
+            50.0f * hpBoost,
+            10.0f * dmgBoost,
+            2.0f
+        );
+
+        e->pos = Vec3(2 + i, 12, 0);
+        enemies.push_back(e);
+    }
+
+    waveActive = true;
+    showWaveComplete = false;
+}
+
+void WaveSystem::Update(float dt, const Vec3& playerPos, float& playerHP) {
+    if (gameWon || gameLost) return;
+
+  
+    for (int i = enemies.size() - 1; i >= 0; i--) {
+        Enemy* e = enemies[i];
+
+        float dxP = e->pos.x - playerPos.x;
+        float dyP = e->pos.y - playerPos.y;
+        float distPlayer = sqrt(dxP * dxP + dyP * dyP);
+
+        float dxT = e->pos.x - tower->pos.x;
+        float dyT = e->pos.y - tower->pos.y;
+        float distTower = sqrt(dxT * dxT + dyT * dyT);
+
+        if (distPlayer < 4.0f) {
+            e->MoveTowards(playerPos);
+            if (distPlayer < 1.0f) {
+                playerHP -= e->GetDamage() * dt;
+            }
+        }
+        else {
+            e->MoveTowards(tower->pos);
+            if (distTower < 1.2f) {
+                e->vel = Vec3(0, 0, 0);  
+                tower->TakeDamage(e->GetDamage() * dt);
+            }
+        }
+
+        e->Update(dt);
+
+        if (e->IsDead()) {
+            delete e;
+            enemies.erase(enemies.begin() + i);
+        }
+    }
+
+    
+    if (tower->IsDestroyed() || playerHP <= 0) {
+        gameLost = true;
+        return;
+    }
+
+    // wawe end
+    if (waveActive && enemies.empty()) {
+        waveActive = false;
+        showWaveComplete = true;
+        messageTimer = 2.0f;
+        timer = waveDelay;
+    }
+
+    // message timer
+    if (showWaveComplete) {
+        messageTimer -= dt;
+        if (messageTimer <= 0) {
+            showWaveComplete = false;
+        }
+    }
+
+	// wawe pause timer
+    if (!waveActive && !gameWon && !gameLost) {
+        if (timer > 0) {
+            timer -= dt;
+        }
+        else {
+            StartWave();
+        }
+    }
+}
+
+void WaveSystem::CleanEnemies() {
+    for (auto e : enemies) {
+        delete e;
+    }
+    enemies.clear();
+}

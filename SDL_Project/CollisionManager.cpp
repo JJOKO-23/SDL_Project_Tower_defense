@@ -44,7 +44,8 @@ void CollisionManager::CheckCollisions(std::vector<Entity*>& entities) {
 
         for (size_t j = i + 1; j < entities.size(); ++j) {
             if (Intersects(entities[i], entities[j])) {
-                ResolveCollision(entities[i], entities[j]);
+                ResolvePush(entities[i], entities[j]);
+
             }
         }
     }
@@ -111,5 +112,26 @@ void CollisionManager::CheckPlayerPlatform(Player* player, const std::vector<Pla
             player->pos.x = right + player->radius;
             player->vel.x = 0;
         }
+    }
+}
+
+void CollisionManager::ResolvePush(Entity* a, Entity* b) {
+    float dx = a->pos.x - b->pos.x;
+    float dy = a->pos.y - b->pos.y;
+
+    float dist = sqrt(dx * dx + dy * dy);
+    if (dist == 0) dist = 0.01f;
+
+    float overlap = (a->radius + b->radius) - dist;
+
+    if (overlap > 0) {
+        float nx = dx / dist;
+        float ny = dy / dist;
+
+        a->pos.x += nx * overlap * 0.5f;
+        a->pos.y += ny * overlap * 0.5f;
+
+        b->pos.x -= nx * overlap * 0.5f;
+        b->pos.y -= ny * overlap * 0.5f;
     }
 }
