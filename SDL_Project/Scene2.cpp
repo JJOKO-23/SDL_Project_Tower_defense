@@ -559,11 +559,24 @@ void Scene2::Update(const float deltaTime) {
 	//projectiles update END
 }
 
+void DrawAABB(SDL_Renderer* renderer, float x, float y, float w, float h, SDL_Color color) {
+	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+
+	SDL_FRect rect;
+	rect.x = x;
+	rect.y = y;
+	rect.w = w;
+	rect.h = h;
+
+	SDL_RenderRect(renderer, &rect);
+}
+
 	
 
 void Scene2::Render() const {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
+	//UI RENDERING
 
 	/// 1) СНАЧАЛА — SETTINGS MENU (если открыто)
 	if (showSettingsMenu)
@@ -604,12 +617,10 @@ void Scene2::Render() const {
 	}
 
 	/// 2) ДАЛЬШЕ — ГЛАВНОЕ МЕНЮ
-	SDL_RenderRect(renderer, &rect);
-}
-void Scene2::Render() const {
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-	SDL_RenderClear(renderer);
-	//UI RENDERING
+
+
+
+	
 	if (showMainMenu)
 	{
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -663,6 +674,7 @@ void Scene2::Render() const {
 	rect.y = screenCoords.y;
 	rect.w = back->GetSurface()->w * 1.5f;
 	rect.h = back->GetSurface()->h * 1.5f;
+
 	SDL_RenderTextureRotated(renderer, back->GetTexture(), nullptr, &rect, back->angleDeg, nullptr, SDL_FLIP_NONE);
 
 	screenCoords = projectionMatrix * player->pos;
@@ -692,11 +704,11 @@ void Scene2::Render() const {
 	SDL_RenderFillRect(renderer, &hpFill);
 	
 	
-
+	// platforms render
 	
 	float pixelsPerUnitX = 1280 / xAxis;
 	float pixelsPerUnitY = 720 / yAxis;
-	// platforms render
+	
 	for (auto p : platforms)
 	{
 		Vec3 sc = projectionMatrix * p->pos;
