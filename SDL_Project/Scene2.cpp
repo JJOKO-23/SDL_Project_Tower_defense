@@ -6,6 +6,7 @@
 #include "Entity.h"
 #include "Player.h"
 #include<SDL3/SDL_mixer.h>
+#include<SDL3/SDL_ttf.h>
 
 
 
@@ -43,8 +44,11 @@ bool Scene2::OnCreate() {
 		std::cerr << "SDL_Error: " << SDL_GetError() << std::endl;
 		return false;
 	}
-	//Initialize renderer color (black)
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+
+	//TTF_Font* font = TTF_OpenFont("fonts/arial.ttf", 24);
+	
+
+	//ACTOR CREATION START
 
 	// Create the objects that will be rendered on the screen
 	back = new Entity();
@@ -53,18 +57,17 @@ bool Scene2::OnCreate() {
 
 	player = new Player();
 	player->pos = Vec3(15, 8, 0);
-	//player->radius = 1.0f;
-	//player->radius = 0.5f;
-
-
-
-	tower = new Tower(300.0f);
+	
+	tower = new Tower(500.0f);
 	tower->pos = Vec3(15, 2, 0);
 	
 	waves = new WaveSystem();
 	waves->Init(tower);
 
+	//ACTOR CREATION END
 
+
+	//ANIMATION START
 
 	#pragma region PlayerIdleAnimation
 		player->idleAnim.AddFrame(IMG_LoadTexture(renderer, "textures/IDLE_000.png"));
@@ -145,7 +148,9 @@ bool Scene2::OnCreate() {
 	player->animation.SetFPS(17.0f);
 
 	
-	//character->SetImage("textures/idle.png", renderer);
+	//ANIMATION END
+
+	//PLATFORMS	START
 
 	Platform* ground = new Platform(Vec3(5, 1, 0), 15, 2);
 	ground->SetImage("textures/lalaBrick.png", renderer);
@@ -154,8 +159,6 @@ bool Scene2::OnCreate() {
 	Platform* ground2 = new Platform(Vec3(24, 1, 0), 15, 2);
 	ground2->SetImage("textures/lalaBrick.png", renderer);
 	platforms.push_back(ground2);
-
-
 
 	Platform* block = new Platform(Vec3(5, 4, 0), 4, 1);
 	block->SetImage("textures/lalaBrick.png", renderer);
@@ -173,7 +176,7 @@ bool Scene2::OnCreate() {
 
 	entities.push_back(player);
 
-
+	//PLATFORMS END
 
 	//**********************UUUUIII*********************
 
@@ -213,7 +216,8 @@ bool Scene2::OnCreate() {
 	backButtonTexture = IMG_LoadTexture(renderer, "textures/BACK_BUTTON.png");
 	backButtonRect = { 20, 20, 200, 120 };
 	
-	/////////////////
+	//**********************UUUUIII*********************
+	// ===== INIT AUDIO =====
 
 	if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0) {
 		std::cout << "SDL audio init error: " << SDL_GetError() << std::endl;
@@ -255,6 +259,7 @@ bool Scene2::OnCreate() {
 			MIX_SetTrackGain(musicTrack, volume);
 		}
 	}
+	// ===== INIT AUDIO END =====
 
 	collisionManager = new CollisionManager(0.0f, xAxis, 0.0f, yAxis);
 	return true;
@@ -500,9 +505,20 @@ void Scene2::Update(const float deltaTime) {
 
 	player->Update(deltaTime);
 	waves->Update(deltaTime, player->pos, playerHP);
+	
+	for (auto e : waves->enemies) {
+		entities.push_back(e);
+	}
+
+	collisionManager->CheckCollisions(entities);
+
+	
+	entities.clear();
+	entities.push_back(player);
+
 	//character->pos += character->vel * deltaTime;
 	collisionManager->CheckPlayerPlatform(player, platforms);
-	collisionManager->CheckCollisions(entities);
+	
 	
 	
 	//collisionManager->CheckCollisions(entities);
@@ -570,6 +586,8 @@ void DrawAABB(SDL_Renderer* renderer, float x, float y, float w, float h, SDL_Co
 
 	SDL_RenderRect(renderer, &rect);
 }
+
+
 
 	
 
@@ -765,7 +783,7 @@ void Scene2::Render() const {
 	// tower render
 	Vec3 tpos = projectionMatrix * tower->pos;
 
-	SDL_FRect towerRect = { tpos.x - 15, tpos.y - 15, 30, 30 };
+	SDL_FRect towerRect = { tpos.x - 30, tpos.y - 30, 60, 60 };
 	SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
 	SDL_RenderFillRect(renderer, &towerRect);
 
@@ -775,6 +793,37 @@ void Scene2::Render() const {
 
 	SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
 	SDL_RenderFillRect(renderer, &moneyBar);
+
+	// ===== WAVE TEXT BOX =====
+	SDL_FRect waveBarBg = { 500, 50, 300, 12 };
+	SDL_SetRenderDrawColor(renderer, 30, 30, 30, 200);
+	SDL_RenderFillRect(renderer, &waveBarBg);
+
+	// заполняющая часть
+	float ratio = (waves->waveDelay - waves->timer) / waves->waveDelay;
+	if (ratio < 0) ratio = 0;
+	if (ratio > 1) ratio = 1;
+
+	SDL_FRect waveBar = { 500, 50, 300 * ratio, 12 };
+	SDL_SetRenderDrawColor(renderer, 100, 200, 255, 255);
+	SDL_RenderFillRect(renderer, &waveBar);
+
+
+	// ===== GAME WON SCREEN =====
+	if (waves->gameWon)
+	{
+		SDL_FRect winBox = { 400, 200, 500, 200 };
+		SDL_SetRenderDrawColor(renderer, 0, 255, 0, 200);
+		SDL_RenderFillRect(renderer, &winBox);
+	}
+
+	// ===== GAME LOST SCREEN =====
+	if (waves->gameLost)
+	{
+		SDL_FRect loseBox = { 400, 200, 500, 200 };
+		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 200);
+		SDL_RenderFillRect(renderer, &loseBox);
+	}
 
 
 

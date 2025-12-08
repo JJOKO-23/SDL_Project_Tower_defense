@@ -1,4 +1,4 @@
-#include "WaveSystem.h"
+﻿#include "WaveSystem.h"
 
 #include <cmath>
 
@@ -9,7 +9,6 @@ void WaveSystem::Init(Tower* t) {
 
 void WaveSystem::StartWave() {
     CleanEnemies();
-
     currentWave++;
 
     if (currentWave > maxWaves) {
@@ -23,6 +22,8 @@ void WaveSystem::StartWave() {
     float hpBoost = 1.0f + (currentWave - 1) * 0.5f;
     float dmgBoost = 1.0f + (currentWave - 1) * 0.5f;
 
+    SDL_Renderer* renderer = SDL_GetRenderer(SDL_GetWindowFromID(1));
+
     for (int i = 0; i < enemyCount; i++) {
         Enemy* e = new Enemy(
             50.0f * hpBoost,
@@ -31,12 +32,17 @@ void WaveSystem::StartWave() {
         );
 
         e->pos = Vec3(2 + i, 12, 0);
+
+        // ✅ ТУТ безопасно задаём текстуру
+        e->SetTexture(IMG_LoadTexture(renderer, "textures/enemy.png"));
+
         enemies.push_back(e);
     }
 
     waveActive = true;
     showWaveComplete = false;
 }
+
 
 void WaveSystem::Update(float dt, const Vec3& playerPos, float& playerHP) {
     if (gameWon || gameLost) return;
@@ -52,14 +58,15 @@ void WaveSystem::Update(float dt, const Vec3& playerPos, float& playerHP) {
         float dxT = e->pos.x - tower->pos.x;
         float dyT = e->pos.y - tower->pos.y;
         float distTower = sqrt(dxT * dxT + dyT * dyT);
-
-        if (distPlayer < 4.0f) {
+       //detection raduis for player
+        if (distPlayer < 10.0f) {
             e->MoveTowards(playerPos);
             if (distPlayer < 1.0f) {
                 playerHP -= e->GetDamage() * dt;
             }
         }
         else {
+			//Detection radius for tower
             e->MoveTowards(tower->pos);
             if (distTower < 1.2f) {
                 e->vel = Vec3(0, 0, 0);  

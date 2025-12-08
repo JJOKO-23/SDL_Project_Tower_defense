@@ -200,6 +200,8 @@ void Player::Attack(std::vector<Entity*>& enemies,
             {
                 delete enemies[i];
                 enemies.erase(enemies.begin() + i);
+
+
                 hitSomething = true;
             }
         }

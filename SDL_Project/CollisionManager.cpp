@@ -39,17 +39,25 @@ void CollisionManager::ResolveCollision(Entity* a, Entity* b) {
 
 void CollisionManager::CheckCollisions(std::vector<Entity*>& entities) {
     for (size_t i = 0; i < entities.size(); ++i) {
-        
+
         ClampToWorld(entities[i]);
 
         for (size_t j = i + 1; j < entities.size(); ++j) {
+
+           
+            Player* p1 = dynamic_cast<Player*>(entities[i]);
+            Player* p2 = dynamic_cast<Player*>(entities[j]);
+
+            if (p1 || p2)
+                continue;
+
             if (Intersects(entities[i], entities[j])) {
                 ResolvePush(entities[i], entities[j]);
-
             }
         }
     }
 }
+
 void CollisionManager::CheckPlayerPlatform(Player* player, const std::vector<Platform*>& platforms)
 {
     player->grounded = false;
