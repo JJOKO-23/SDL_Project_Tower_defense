@@ -65,6 +65,20 @@ private:
 	SDL_FRect playButtonRect;
 	SDL_FRect mainMenuRect;
 
+
+
+
+	SDL_Texture* settingsButtonTexture = nullptr;
+	SDL_Texture* settingsBackground = nullptr;
+	SDL_Texture* volumeBarTexture = nullptr;
+	SDL_Texture* backButtonTexture = nullptr;
+
+	SDL_FRect settingsButtonRect;
+	bool showSettingsMenu = false;
+	SDL_FRect backButtonRect;
+	SDL_FRect volumeBarRect;
+
+
 	float loadingTime = 1.0f;
 
 
@@ -75,6 +89,7 @@ private:
 	// MUSIC
 	MIX_Audio* menuMusic = nullptr;
 	MIX_Audio* gameMusic = nullptr;
+	MIX_Track* musicTrack = nullptr;
 
 	int menuMusicID = -1;
 	int gameMusicID = -1;
@@ -90,6 +105,13 @@ public:
 	void HandleEvents(const SDL_Event& event) override;
 	void Update(const float time) override;
 	void Render() const override;
+
+	float settingsScale = 1.0f;
+	float settingsTargetScale = 1.0f;
+	bool settingsHover = false;
+
+	// audio volume
+	float volume = 0.2f;
 };
 
 #endif

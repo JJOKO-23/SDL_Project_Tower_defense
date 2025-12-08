@@ -49,7 +49,7 @@ bool Scene2::OnCreate() {
 	// Create the objects that will be rendered on the screen
 	back = new Entity();
 	back->pos = Vec3(0.0f, 15.0f, 0.0f);
-	back->SetImage("textures/background4b.png", renderer);
+	back->SetImage("textures/lala.png", renderer);
 
 	player = new Player();
 	player->pos = Vec3(15, 8, 0);
@@ -107,6 +107,40 @@ bool Scene2::OnCreate() {
 	player->walkAnim.AddFrame(IMG_LoadTexture(renderer, "textures/WALK_014.png"));
 	player->walkAnim.AddFrame(IMG_LoadTexture(renderer, "textures/WALK_015.png"));
 	#pragma endregion
+
+#pragma region PlayerMeleeAnimation
+	player->meleeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/slash_000 (1).png"));
+	player->meleeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/slash_000 (2).png"));
+	player->meleeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/slash_000 (3).png"));
+	player->meleeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/slash_000 (4).png"));
+	player->meleeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/slash_000 (5).png"));
+	player->meleeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/slash_000 (6).png"));
+	player->meleeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/slash_000 (7).png"));
+	player->meleeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/slash_000 (8).png"));
+	player->meleeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/slash_000 (9).png"));
+	player->meleeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/slash_000 (10).png"));
+	player->meleeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/slash_000 (11).png"));
+	player->meleeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/slash_000 (12).png"));
+	
+#pragma endregion
+
+#pragma region PlayerRangeAnimation
+	player->rangeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/RANGE_000 (1).png"));
+	player->rangeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/RANGE_000 (2).png"));
+	player->rangeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/RANGE_000 (3).png"));
+	player->rangeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/RANGE_000 (4).png"));
+	player->rangeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/RANGE_000 (5).png"));
+	player->rangeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/RANGE_000 (6).png"));
+	player->rangeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/RANGE_000 (7).png"));
+	player->rangeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/RANGE_000 (8).png"));
+	player->rangeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/RANGE_000 (9).png"));
+	player->rangeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/RANGE_000 (10).png"));
+	player->rangeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/RANGE_000 (11).png"));
+	player->rangeAnim.AddFrame(IMG_LoadTexture(renderer, "textures/RANGE_000 (12).png"));
+	
+#pragma endregion
+
+
 	// скорость анимации
 	player->animation.SetFPS(17.0f);
 
@@ -114,23 +148,27 @@ bool Scene2::OnCreate() {
 	//character->SetImage("textures/idle.png", renderer);
 
 	Platform* ground = new Platform(Vec3(5, 1, 0), 15, 2);
-	ground->SetImage("textures/grass.jpg", renderer);
+	ground->SetImage("textures/lalaBrick.png", renderer);
 	platforms.push_back(ground);
 
 	Platform* ground2 = new Platform(Vec3(24, 1, 0), 15, 2);
-	ground2->SetImage("textures/grass.jpg", renderer);
+	ground2->SetImage("textures/lalaBrick.png", renderer);
 	platforms.push_back(ground2);
 
 
 
 	Platform* block = new Platform(Vec3(5, 4, 0), 4, 1);
+	block->SetImage("textures/lalaBrick.png", renderer);
 	platforms.push_back(block);
 	Platform* block2 = new Platform(Vec3(25, 5, 0), 4, 1);
+	block2->SetImage("textures/lalaBrick.png", renderer);
 	platforms.push_back(block2);
 
 	Platform* block3 = new Platform(Vec3(10, 8, 0), 4, 1);
+	block3->SetImage("textures/lalaBrick.png", renderer);
 	platforms.push_back(block3);
 	Platform* block4 = new Platform(Vec3(20, 8, 0), 4, 1);
+	block4->SetImage("textures/lalaBrick.png", renderer);
 	platforms.push_back(block4);
 
 	entities.push_back(player);
@@ -159,6 +197,21 @@ bool Scene2::OnCreate() {
 
 	mainMenuRect.x = (w / 2.0f) - (mainMenuRect.w / 2.0f);
 	mainMenuRect.y = (h / 2.0f) - (mainMenuRect.h / 2.0f);
+
+
+	settingsButtonTexture = IMG_LoadTexture(renderer, "textures/SETTINGS_BUTTON2.png");
+	settingsButtonRect.x = 320;
+	settingsButtonRect.y = 500;
+	settingsButtonRect.w = 420;
+	settingsButtonRect.h = 270;
+
+	settingsBackground = IMG_LoadTexture(renderer, "textures/MAIN_SCREEN.png");
+
+	volumeBarTexture = IMG_LoadTexture(renderer, "textures/VOLUME_BAR2.png");
+	volumeBarRect = { 300, 300, 700, 100 };
+
+	backButtonTexture = IMG_LoadTexture(renderer, "textures/BACK_BUTTON.png");
+	backButtonRect = { 20, 20, 200, 120 };
 	
 	/////////////////
 
@@ -184,6 +237,23 @@ bool Scene2::OnCreate() {
 	gameMusic = MIX_LoadAudio(mixer, "Audio/GAME_Audio.mp3", true);
 	if (!gameMusic) {
 		std::cout << "Failed to load GameMusic.wav: " << SDL_GetError() << std::endl;
+	}
+
+	if (gameMusic)
+	{
+		musicTrack = MIX_CreateTrack(mixer);
+		if (!musicTrack)
+		{
+			std::cout << "Failed to create music track: " << SDL_GetError() << std::endl;
+		}
+		else
+		{
+			// bind audio to this track
+			MIX_SetTrackAudio(musicTrack, gameMusic);
+
+			// initial volume (you уже можешь ещё и master gain юзать, это опционально)
+			MIX_SetTrackGain(musicTrack, volume);
+		}
 	}
 
 	collisionManager = new CollisionManager(0.0f, xAxis, 0.0f, yAxis);
@@ -227,6 +297,18 @@ void Scene2::OnDestroy() {
 		menuMusic = nullptr;
 	}
 
+	if (musicTrack)
+	{
+		MIX_DestroyTrack(musicTrack);
+		musicTrack = nullptr;
+	}
+
+	if (gameMusic)
+	{
+		MIX_DestroyAudio(gameMusic);
+		gameMusic = nullptr;
+	}
+
 	//if (gameMusic) {
 	//	MIX_DestroyAudio(gameMusic);
 	//	gameMusic = nullptr;
@@ -237,51 +319,153 @@ void Scene2::OnDestroy() {
 
 void Scene2::HandleEvents(const SDL_Event& event)
 {
+	// ===== GLOBAL: return to main menu from in-game with ESC =====
+	if (!showMainMenu && !showSettingsMenu)
+	{
+		if (event.type == SDL_EVENT_KEY_DOWN &&
+			event.key.key == SDLK_ESCAPE)
+		{
+			showMainMenu = true;
+			showSettingsMenu = false;
+
+			if (musicTrack)
+			{
+				// stop immediately, no fade (0 frames)
+				MIX_StopTrack(musicTrack, 0);
+			}
+
+			return;
+		}
+	}
+
+	// Player input (movement, jump, attacks bound to keys, etc.)
 	player->HandleInput(event);
 
+	// ===== MAIN MENU =====
 	if (showMainMenu)
 	{
+		// Play button hover
 		if (event.type == SDL_EVENT_MOUSE_MOTION)
 		{
 			float mx = event.motion.x;
 			float my = event.motion.y;
 
-			bool inside =
-				mx >= playButtonRect.x && mx <= playButtonRect.x + playButtonRect.w &&
-				my >= playButtonRect.y && my <= playButtonRect.y + playButtonRect.h;
+			bool overPlay =
+				mx >= playButtonRect.x &&
+				mx <= playButtonRect.x + playButtonRect.w &&
+				my >= playButtonRect.y &&
+				my <= playButtonRect.y + playButtonRect.h;
 
-			if (inside)
+			if (overPlay)
 			{
 				playHover = true;
-				playTargetScale = 1.15f;   // кнопка увеличивается
+				playTargetScale = 1.15f;
 			}
 			else
 			{
 				playHover = false;
-				playTargetScale = 1.0f;    // возвращается к нормальному размеру
+				playTargetScale = 1.0f;
 			}
+
+			bool overSettings =
+				mx >= settingsButtonRect.x &&
+				mx <= settingsButtonRect.x + settingsButtonRect.w &&
+				my >= settingsButtonRect.y &&
+				my <= settingsButtonRect.y + settingsButtonRect.h;
+
+			settingsTargetScale = overSettings ? 1.15f : 1.0f;
 		}
 
-		if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
+		// Play / Settings clicks
+		if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN &&
+			event.button.button == SDL_BUTTON_LEFT)
 		{
 			float mx = event.button.x;
 			float my = event.button.y;
 
-			if (mx >= playButtonRect.x && mx <= playButtonRect.x + playButtonRect.w &&
-				my >= playButtonRect.y && my <= playButtonRect.y + playButtonRect.h)
+			bool overPlay =
+				mx >= playButtonRect.x &&
+				mx <= playButtonRect.x + playButtonRect.w &&
+				my >= playButtonRect.y &&
+				my <= playButtonRect.y + playButtonRect.h;
+
+			if (overPlay)
 			{
 				showMainMenu = false;
-				
-				if (gameMusic) {
-					MIX_PlayAudio(mixer, gameMusic);
+
+				if (musicTrack)
+				{
+					// start or restart this single track (no duplication)
+					MIX_PlayTrack(musicTrack, 0);   // options = 0 for now
 				}
-				
+				return;
+			}
+
+			bool overSettings =
+				mx >= settingsButtonRect.x &&
+				mx <= settingsButtonRect.x + settingsButtonRect.w &&
+				my >= settingsButtonRect.y &&
+				my <= settingsButtonRect.y + settingsButtonRect.h;
+
+			if (overSettings)
+			{
+				showSettingsMenu = true;
+				return;
 			}
 		}
 
-		return;
+		return; // do not process game events while in main menu
 	}
 
+	// ===== SETTINGS MENU =====
+	if (showSettingsMenu)
+	{
+		// Back button
+		if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN &&
+			event.button.button == SDL_BUTTON_LEFT)
+		{
+			float mx = event.button.x;
+			float my = event.button.y;
+
+			bool overBack =
+				mx >= backButtonRect.x &&
+				mx <= backButtonRect.x + backButtonRect.w &&
+				my >= backButtonRect.y &&
+				my <= backButtonRect.y + backButtonRect.h;
+
+			if (overBack)
+			{
+				showSettingsMenu = false;
+				return;
+			}
+		}
+
+		// Volume dragging
+		if (event.type == SDL_EVENT_MOUSE_MOTION &&
+			(event.motion.state & SDL_BUTTON_LMASK))
+		{
+			float mx = event.motion.x;
+
+			float barStart = volumeBarRect.x;
+			float barEnd = volumeBarRect.x + volumeBarRect.w;
+
+			// clamp mouse X to bar range
+			if (mx < barStart) mx = barStart;
+			if (mx > barEnd)   mx = barEnd;
+
+			volume = (mx - barStart) / volumeBarRect.w; // 0.0f .. 1.0f
+
+			if (mixer)
+			{
+				// simple variant: master gain
+				MIX_SetMasterGain(mixer, volume);
+			}
+		}
+
+		return; // do not process game events while in settings
+	}
+
+	// ===== IN-GAME EVENTS =====
 	if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN &&
 		event.button.button == SDL_BUTTON_LEFT)
 	{
@@ -289,7 +473,7 @@ void Scene2::HandleEvents(const SDL_Event& event)
 		player->Attack((std::vector<Entity*>&)waves->enemies, projectiles);
 
 	}
-} 
+}
 
 	
 
@@ -310,7 +494,7 @@ void Scene2::Update(const float deltaTime) {
 		// плавная интерполяция
 		float speed = 10.0f; // скорость анимации
 		playScale += (playTargetScale - playScale) * speed * deltaTime;
-
+		settingsScale += (settingsTargetScale - settingsScale) * 10.0f * deltaTime;
 		return;
 	}
 
@@ -377,16 +561,49 @@ void Scene2::Update(const float deltaTime) {
 
 	
 
+void Scene2::Render() const {
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+	SDL_RenderClear(renderer);
 
-void DrawAABB(SDL_Renderer* renderer, float x, float y, float w, float h, SDL_Color color) {
-	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+	/// 1) СНАЧАЛА — SETTINGS MENU (если открыто)
+	if (showSettingsMenu)
+	{
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+		SDL_RenderClear(renderer);
 
-	SDL_FRect rect;
-	rect.x = x;
-	rect.y = y;
-	rect.w = w;
-	rect.h = h;
+		// фоновая картинка настроек
+		if (settingsBackground)
+		{
+			SDL_RenderTexture(renderer, settingsBackground, nullptr, nullptr);
+		}
 
+		// Кнопка "Назад"
+		if (backButtonTexture)
+		{
+			SDL_RenderTexture(renderer, backButtonTexture, nullptr, &backButtonRect);
+		}
+
+		// Полоса громкости
+		if (volumeBarTexture)
+		{
+			SDL_RenderTexture(renderer, volumeBarTexture, nullptr, &volumeBarRect);
+		}
+
+		// Ползунок громкости
+		SDL_FRect knob;
+		knob.w = 40.0f;
+		knob.h = 80.0f;
+		knob.x = volumeBarRect.x + volume * volumeBarRect.w - knob.w * 0.5f;
+		knob.y = volumeBarRect.y;
+
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+		SDL_RenderFillRect(renderer, &knob);
+
+		SDL_RenderPresent(renderer);
+		return;
+	}
+
+	/// 2) ДАЛЬШЕ — ГЛАВНОЕ МЕНЮ
 	SDL_RenderRect(renderer, &rect);
 }
 void Scene2::Render() const {
@@ -398,26 +615,41 @@ void Scene2::Render() const {
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
 
-		// рисуем фон меню
+		// фон главного меню
 		if (mainMenuBackground)
 		{
 			SDL_RenderTexture(renderer, mainMenuBackground, nullptr, &mainMenuRect);
 		}
 
-		// ----------- HOVER SCALE -----------
-		// центр кнопки
-		float cx = playButtonRect.x + playButtonRect.w / 2.0f;
-		float cy = playButtonRect.y + playButtonRect.h / 2.0f;
+		// --- КНОПКА PLAY (с масштабом) ---
+		float cx = playButtonRect.x + playButtonRect.w * 0.5f;
+		float cy = playButtonRect.y + playButtonRect.h * 0.5f;
 
-		// прямоугольник с учётом текущего масштаба (playScale)
-		SDL_FRect scaledRect;
-		scaledRect.w = playButtonRect.w * playScale;
-		scaledRect.h = playButtonRect.h * playScale;
-		scaledRect.x = cx - scaledRect.w / 2.0f;
-		scaledRect.y = cy - scaledRect.h / 2.0f;
+		SDL_FRect scaledPlay;
+		scaledPlay.w = playButtonRect.w * playScale;
+		scaledPlay.h = playButtonRect.h * playScale;
+		scaledPlay.x = cx - scaledPlay.w * 0.5f;
+		scaledPlay.y = cy - scaledPlay.h * 0.5f;
 
-		// рисуем увеличенную / уменьшенную кнопку
-		SDL_RenderTexture(renderer, playButtonTexture, nullptr, &scaledRect);
+		if (playButtonTexture)
+		{
+			SDL_RenderTexture(renderer, playButtonTexture, nullptr, &scaledPlay);
+		}
+
+		// --- КНОПКА SETTINGS (с масштабом) ---
+		float csx = settingsButtonRect.x + settingsButtonRect.w * 0.5f;
+		float csy = settingsButtonRect.y + settingsButtonRect.h * 0.5f;
+
+		SDL_FRect scaledSettings;
+		scaledSettings.w = settingsButtonRect.w * settingsScale;
+		scaledSettings.h = settingsButtonRect.h * settingsScale;
+		scaledSettings.x = csx - scaledSettings.w * 0.5f;
+		scaledSettings.y = csy - scaledSettings.h * 0.5f;
+
+		if (settingsButtonTexture)
+		{
+			SDL_RenderTexture(renderer, settingsButtonTexture, nullptr, &scaledSettings);
+		}
 
 		SDL_RenderPresent(renderer);
 		return;
@@ -434,15 +666,9 @@ void Scene2::Render() const {
 	SDL_RenderTextureRotated(renderer, back->GetTexture(), nullptr, &rect, back->angleDeg, nullptr, SDL_FLIP_NONE);
 
 	screenCoords = projectionMatrix * player->pos;
-	float size = player->radius * 2.0f * worldScale;
-	//SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
-
-	//это АНИМАЦИЯ НЕ ТРОГАТЬ 
-	
 	SDL_Texture* pFrame = player->currentAnim->GetCurrentFrame();
-	screenCoords = projectionMatrix * player->pos;
 	SDL_FRect pr;
-	pr.w = 150;     // размер спрайта на экране
+	pr.w = 150;
 	pr.h = 150;
 	pr.x = screenCoords.x - pr.w * 0.5f;
 	pr.y = screenCoords.y - pr.h * 0.5f;
@@ -478,18 +704,12 @@ void Scene2::Render() const {
 		SDL_FRect r;
 		r.w = p->width * pixelsPerUnitX;
 		r.h = p->height * pixelsPerUnitY;
-
 		r.x = sc.x - r.w * 0.5f;
 		r.y = sc.y - r.h * 0.5f;
 
 		SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
 		SDL_RenderFillRect(renderer, &r);
-
-		// draw texture
 		SDL_RenderTexture(renderer, p->texture, nullptr, &r);
-
-		// draw AABB as red rectangle
-		DrawAABB(renderer, r.x, r.y, r.w, r.h, SDL_Color{ 255, 0, 0, 255 });
 	}
 	// projectiles render			
 	for (auto p : projectiles)
@@ -499,8 +719,8 @@ void Scene2::Render() const {
 		SDL_FRect r;
 		r.x = sc.x;
 		r.y = sc.y;
-		r.w = 20; 
-		r.h = 4;  
+		r.w = 20;
+		r.h = 4;
 
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 		SDL_RenderFillRect(renderer, &r);
@@ -546,7 +766,5 @@ void Scene2::Render() const {
 
 
 
-
-	// Update the screen
 	SDL_RenderPresent(renderer);
 }

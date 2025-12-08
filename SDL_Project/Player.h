@@ -32,6 +32,8 @@ public:
 
     Animation idleAnim;
     Animation walkAnim;
+    Animation meleeAnim;
+    Animation rangeAnim;
 
     Animation* currentAnim = nullptr;
 
