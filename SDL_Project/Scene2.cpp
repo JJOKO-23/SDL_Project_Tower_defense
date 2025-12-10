@@ -693,7 +693,7 @@ void Scene2::Render() const {
 	}
 	//UI RENDERING END
 
-	// Render the player here
+	
 	Vec3 screenCoords = projectionMatrix * back->pos;
 	SDL_FRect rect;
 	rect.x = screenCoords.x;
@@ -703,6 +703,40 @@ void Scene2::Render() const {
 
 	SDL_RenderTextureRotated(renderer, back->GetTexture(), nullptr, &rect, back->angleDeg, nullptr, SDL_FLIP_NONE);
 
+	
+	// platforms render
+	
+	float pixelsPerUnitX = 1280 / xAxis;
+	float pixelsPerUnitY = 720 / yAxis;
+	
+	for (auto p : platforms)
+	{
+		Vec3 sc = projectionMatrix * p->pos;
+
+		SDL_FRect r;
+		r.w = p->width * pixelsPerUnitX;
+		r.h = p->height * pixelsPerUnitY;
+		r.x = sc.x - r.w * 0.5f;
+		r.y = sc.y - r.h * 0.5f;
+		// draw AABB as red rectangle
+		//DrawAABB(renderer, r.x, r.y, r.w, r.h, SDL_Color{ 255, 0, 0, 255 });
+		SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+		SDL_RenderFillRect(renderer, &r);
+		SDL_RenderTexture(renderer, p->texture, nullptr, &r);
+		DrawAABB(renderer, r.x, r.y, r.w, r.h, SDL_Color{ 255, 0, 0, 255 });
+	}
+	
+
+	// tower render
+	Vec3 tpos = projectionMatrix * tower->pos;
+
+	SDL_FRect towerRect = { tpos.x - 120, tpos.y - 90, 150,90 }; //tower size (150,90)
+	SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+	SDL_RenderFillRect(renderer, &towerRect);
+
+
+
+	// Render the player here
 	screenCoords = projectionMatrix * player->pos;
 	SDL_Texture* pFrame = player->currentAnim->GetCurrentFrame();
 	SDL_FRect pr;
@@ -728,29 +762,7 @@ void Scene2::Render() const {
 	SDL_FRect hpFill = { psc.x - 30, psc.y - 90, 60 * hpRatio, 6 };
 	SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
 	SDL_RenderFillRect(renderer, &hpFill);
-	
-	
-	// platforms render
-	
-	float pixelsPerUnitX = 1280 / xAxis;
-	float pixelsPerUnitY = 720 / yAxis;
-	
-	for (auto p : platforms)
-	{
-		Vec3 sc = projectionMatrix * p->pos;
 
-		SDL_FRect r;
-		r.w = p->width * pixelsPerUnitX;
-		r.h = p->height * pixelsPerUnitY;
-		r.x = sc.x - r.w * 0.5f;
-		r.y = sc.y - r.h * 0.5f;
-		// draw AABB as red rectangle
-		//DrawAABB(renderer, r.x, r.y, r.w, r.h, SDL_Color{ 255, 0, 0, 255 });
-		SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
-		SDL_RenderFillRect(renderer, &r);
-		SDL_RenderTexture(renderer, p->texture, nullptr, &r);
-		DrawAABB(renderer, r.x, r.y, r.w, r.h, SDL_Color{ 255, 0, 0, 255 });
-	}
 	// projectiles render			
 	for (auto p : projectiles)
 	{
@@ -828,16 +840,11 @@ void Scene2::Render() const {
 		SDL_RenderFillRect(renderer, &hpBar);
 	}
 
-	// tower render
-	Vec3 tpos = projectionMatrix * tower->pos;
-
-	SDL_FRect towerRect = { tpos.x - 30, tpos.y - 30, 60, 60 };
-	SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-	SDL_RenderFillRect(renderer, &towerRect);
+	
 
 	// money bar
 	float mRatio = tower->GetMoney() / tower->GetMaxMoney();
-	SDL_FRect moneyBar = { towerRect.x, towerRect.y - 6, 30 * mRatio, 4 };
+	SDL_FRect moneyBar = { towerRect.x, towerRect.y - 6, 30 * mRatio, 6 };
 
 	SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
 	SDL_RenderFillRect(renderer, &moneyBar);

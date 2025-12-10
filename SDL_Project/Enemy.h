@@ -15,7 +15,7 @@ private:
 
  
     
-    float jumpForce = 12.0f;
+    
     float gravity = 9.8f;
 
 

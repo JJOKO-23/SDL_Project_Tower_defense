@@ -29,7 +29,7 @@ public:
 
 
     void Init(Tower* t, const std::vector<Platform*>& plats);
-    
+    void PushApartEnemies(float dt);
     void StartWave();
     void Update(float dt, const Vec3& playerPos, float& playerHP);
     void CleanEnemies();

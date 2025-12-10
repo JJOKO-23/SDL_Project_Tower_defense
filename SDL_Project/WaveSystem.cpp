@@ -12,6 +12,38 @@ void WaveSystem::Init(Tower* t, const std::vector<Platform*>& plats)
     StartWave();
 }
 
+void WaveSystem::PushApartEnemies(float dt)
+{
+    for (int i = 0; i < enemies.size(); i++)
+    {
+        for (int j = i + 1; j < enemies.size(); j++)
+        {
+            Enemy* a = enemies[i];
+            Enemy* b = enemies[j];
+
+            float dx = b->pos.x - a->pos.x;
+            float dy = b->pos.y - a->pos.y;
+            float dist = sqrt(dx * dx + dy * dy);
+
+            float minDist = 1.0f;
+
+            if (dist < minDist && dist > 0.001f)
+            {
+                float overlap = minDist - dist;
+
+                float nx = dx / dist;
+                float ny = dy / dist;
+
+
+                a->pos.x -= nx * overlap * 0.5f;
+                b->pos.x += nx * overlap * 0.5f;
+
+                a->pos.y -= ny * overlap * 0.5f;
+                b->pos.y += ny * overlap * 0.5f;
+            }
+        }
+    }
+}
 
 void WaveSystem::StartWave() {
     CleanEnemies();
@@ -65,7 +97,7 @@ void WaveSystem::Update(float dt, const Vec3& playerPos, float& playerHP) {
         float dyT = e->pos.y - tower->pos.y;
         float distTower = sqrt(dxT * dxT + dyT * dyT);
        //detection raduis for player
-        if (distPlayer < 10.0f) {
+        if (distPlayer < 5.0f) {
             e->MoveTowards(playerPos, platforms);
 
             if (distPlayer < 1.0f) {
@@ -88,7 +120,7 @@ void WaveSystem::Update(float dt, const Vec3& playerPos, float& playerHP) {
             enemies.erase(enemies.begin() + i);
         }
     }
-
+    PushApartEnemies(dt);
     
     if (tower->IsDestroyed() || playerHP <= 0) {
         gameLost = true;
@@ -121,6 +153,8 @@ void WaveSystem::Update(float dt, const Vec3& playerPos, float& playerHP) {
         }
     }
 }
+
+
 
 void WaveSystem::CleanEnemies() {
     for (auto e : enemies) {
