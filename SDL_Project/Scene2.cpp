@@ -758,8 +758,11 @@ void Scene2::Render() const {
 
 	//wawes render enemies
 	for (auto e : waves->enemies) {
+
+		
 		Vec3 sc = projectionMatrix * e->pos;
 
+		
 		SDL_FRect r;
 		r.x = sc.x - 10;
 		r.y = sc.y - 10;
@@ -769,8 +772,29 @@ void Scene2::Render() const {
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 		SDL_RenderFillRect(renderer, &r);
 
-		// HP BAR
+		
+		float enemyW = 2.0f;
+		float enemyH = 2.5f;
+
+		Vec3 aabbMin(e->pos.x - enemyW / 2, e->pos.y - enemyH / 2, 0);
+		Vec3 aabbMax(e->pos.x + enemyW / 2, e->pos.y + enemyH / 2, 0);
+
+		
+		Vec3 scMin = projectionMatrix * aabbMin;
+		Vec3 scMax = projectionMatrix * aabbMax;
+
+		SDL_FRect box;
+		box.x = scMin.x;
+		box.y = scMin.y;
+		box.w = scMax.x - scMin.x;
+		box.h = scMax.y - scMin.y;
+
+		SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); // жёлтый хитбокс
+		SDL_RenderRect(renderer, &box);
+
+		// HP BAR 
 		float hpRatio = e->GetHP() / e->GetMaxHP();
+
 		SDL_FRect hpBar;
 		hpBar.x = r.x;
 		hpBar.y = r.y - 8;
@@ -780,6 +804,7 @@ void Scene2::Render() const {
 		SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
 		SDL_RenderFillRect(renderer, &hpBar);
 	}
+
 	// tower render
 	Vec3 tpos = projectionMatrix * tower->pos;
 
@@ -799,7 +824,7 @@ void Scene2::Render() const {
 	SDL_SetRenderDrawColor(renderer, 30, 30, 30, 200);
 	SDL_RenderFillRect(renderer, &waveBarBg);
 
-	// заполняющая часть
+	
 	float ratio = (waves->waveDelay - waves->timer) / waves->waveDelay;
 	if (ratio < 0) ratio = 0;
 	if (ratio > 1) ratio = 1;

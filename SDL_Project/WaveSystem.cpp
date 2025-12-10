@@ -33,8 +33,8 @@ void WaveSystem::StartWave() {
 
         e->pos = Vec3(2 + i, 12, 0);
 
-        // ✅ ТУТ безопасно задаём текстуру
-        e->SetTexture(IMG_LoadTexture(renderer, "textures/enemy.png"));
+        
+        e->SetTexture(IMG_LoadTexture(renderer, "textures/grass.jpg"));
 
         enemies.push_back(e);
     }

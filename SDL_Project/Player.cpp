@@ -25,7 +25,7 @@ Player::Player()
     projectileTimer = 0.0f;
 
     attacking = false;
-    attackCooldown = 0.3f;   // сколько длится анимация атаки
+    attackCooldown = 0.3f;   
     attackTimer = 0.0f;
 
     currentAnim = &idleAnim;
@@ -96,7 +96,7 @@ void Player::Update(float deltaTime)
     if (projectileTimer < 0.0f)
         projectileTimer = 0.0f;
 
-    // таймер атаки (управляет длиной анимации удара / выстрела)
+    
     if (attacking)
     {
         attackTimer -= deltaTime;
@@ -107,31 +107,31 @@ void Player::Update(float deltaTime)
         }
     }
 
-    // ===== ФИЗИКА / ГРАВИТАЦИЯ =====
+    
 
-    // простая гравитация
+    
     vel.y -= 25.0f * deltaTime;
 
-    // ограничиваем падение, чтобы не разгонялся бесконечно
+    
     if (vel.y < -20.0f)
         vel.y = -20.0f;
 
-    // обновляем позицию
+    
     pos += vel * deltaTime;
 
-    // ===== ВЫБОР АНИМАЦИИ =====
+    
 
     if (attacking)
     {
-        // во время атаки всегда показываем атакующую анимацию
+        
         if (meleeMode)
-            currentAnim = &meleeAnim;   // ближняя атака
+            currentAnim = &meleeAnim;  
         else
-            currentAnim = &rangeAnim;   // дальняя атака
+            currentAnim = &rangeAnim; 
     }
     else
     {
-        // если не атакуем – обычная логика ходьба/статичный
+        
         bool isMoving = (vel.x != 0.0f || vel.y > 0.5f);
 
         if (isMoving)
@@ -140,7 +140,7 @@ void Player::Update(float deltaTime)
             currentAnim = &idleAnim;
     }
 
-    // ===== ОБНОВЛЕНИЕ ТЕКУЩЕЙ АНИМАЦИИ =====
+   
 
     if (currentAnim)
     {
@@ -206,7 +206,7 @@ void Player::Attack(std::vector<Entity*>& enemies,
             }
         }
 
-        // запускаем анимацию ближней атаки даже если не попали
+        
         attacking = true;
         attackTimer = attackCooldown;
     }
@@ -219,7 +219,7 @@ void Player::Attack(std::vector<Entity*>& enemies,
 
             projectileTimer = projectileCooldown;
 
-            // запускаем анимацию дальней атаки
+           
             attacking = true;
             attackTimer = attackCooldown;
         }
