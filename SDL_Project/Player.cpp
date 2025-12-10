@@ -198,11 +198,19 @@ void Player::Attack(std::vector<Entity*>& enemies,
 
             if (dx < 1.0f && dy < 1.0f)
             {
-                delete enemies[i];
-                enemies.erase(enemies.begin() + i);
+                Enemy* enemy = dynamic_cast<Enemy*>(enemies[i]);
+                if (enemy)
+                {
+                    enemy->TakeDamage(meleeDamage);
 
-
+                    if (enemy->IsDead())
+                    {
+                        delete enemy;
+                        enemies.erase(enemies.begin() + i);
+                    }
+                }
                 hitSomething = true;
+
             }
         }
 

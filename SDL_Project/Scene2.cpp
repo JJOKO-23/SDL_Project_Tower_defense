@@ -736,10 +736,12 @@ void Scene2::Render() const {
 		r.h = p->height * pixelsPerUnitY;
 		r.x = sc.x - r.w * 0.5f;
 		r.y = sc.y - r.h * 0.5f;
-
+		// draw AABB as red rectangle
+		//DrawAABB(renderer, r.x, r.y, r.w, r.h, SDL_Color{ 255, 0, 0, 255 });
 		SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
 		SDL_RenderFillRect(renderer, &r);
 		SDL_RenderTexture(renderer, p->texture, nullptr, &r);
+		DrawAABB(renderer, r.x, r.y, r.w, r.h, SDL_Color{ 255, 0, 0, 255 });
 	}
 	// projectiles render			
 	for (auto p : projectiles)
@@ -766,15 +768,28 @@ void Scene2::Render() const {
 		SDL_FRect r;
 		r.x = sc.x - 10;
 		r.y = sc.y - 10;
-		r.w = 20;
-		r.h = 20;
+		r.w = 50;
+		r.h = 70;
+		float enemyW = 2.0f;
+		float enemyH = 2.5f;
 
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 		SDL_RenderFillRect(renderer, &r);
 
 		
-		float enemyW = 2.0f;
-		float enemyH = 2.5f;
+
+		
+
+		SDL_FRect er;
+		er.w = e->width * pixelsPerUnitX;
+		er.h = e->height * pixelsPerUnitY;
+
+		er.x = sc.x - er.w * 0.5f;
+		er.y = sc.y - er.h * 0.5f;
+
+		SDL_RenderTexture(renderer, e->texture, nullptr, &er);
+
+		
 
 		Vec3 aabbMin(e->pos.x - enemyW / 2, e->pos.y - enemyH / 2, 0);
 		Vec3 aabbMax(e->pos.x + enemyW / 2, e->pos.y + enemyH / 2, 0);
@@ -819,7 +834,7 @@ void Scene2::Render() const {
 	SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
 	SDL_RenderFillRect(renderer, &moneyBar);
 
-	// ===== WAVE TEXT BOX =====
+	//WAVE TEXT BOX 
 	SDL_FRect waveBarBg = { 500, 50, 300, 12 };
 	SDL_SetRenderDrawColor(renderer, 30, 30, 30, 200);
 	SDL_RenderFillRect(renderer, &waveBarBg);
@@ -834,7 +849,7 @@ void Scene2::Render() const {
 	SDL_RenderFillRect(renderer, &waveBar);
 
 
-	// ===== GAME WON SCREEN =====
+	//GAME WON SCREEN
 	if (waves->gameWon)
 	{
 		SDL_FRect winBox = { 400, 200, 500, 200 };
@@ -842,7 +857,7 @@ void Scene2::Render() const {
 		SDL_RenderFillRect(renderer, &winBox);
 	}
 
-	// ===== GAME LOST SCREEN =====
+	//GAME LOST SCREEN
 	if (waves->gameLost)
 	{
 		SDL_FRect loseBox = { 400, 200, 500, 200 };

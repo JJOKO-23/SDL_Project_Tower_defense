@@ -5,6 +5,7 @@
 #include "Entity.h"
 #include "Animation.h"
 #include <SDL3/SDL.h>
+#include "Enemy.h"
 #include <vector>
 
 class Projectile;

@@ -7,6 +7,12 @@ Enemy::Enemy(float hp_, float dmg_, float spd_) {
     hp = hp_;
     damage = dmg_;
     speed = spd_;
+    texture = nullptr;
+    width = 2.0f;
+    height = 3.0f;
+    radius = 1.0f;  
+
+
 }
 
 void Enemy::TakeDamage(float amount) {
@@ -20,7 +26,7 @@ void Enemy::MoveTowards(const Vec3& targetPos)
 
     vel.x = (dx > 0 ? 1.0f : -1.0f) * speed;
 
-    // прыжок если цель выше
+    
     if (targetPos.y > pos.y + 1.0f && grounded)
     {
         vel.y = jumpForce;
@@ -31,11 +37,11 @@ void Enemy::MoveTowards(const Vec3& targetPos)
 
 void Enemy::Update(float deltaTime)
 {
-    // гравитация
+    
     vel.y -= gravity * deltaTime;
     if (vel.y < -20.0f) vel.y = -20.0f;
 
-    // обновляем позицию
+    
     pos += vel * deltaTime;
 }
 

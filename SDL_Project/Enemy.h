@@ -10,15 +10,19 @@ private:
     float maxHp;
     float damage;
     float speed;
+    
+
  
     bool grounded = false;
     float jumpForce = 12.0f;
-    float gravity = 25.0f;
+    float gravity = 9.8f;
 
 
 public:
-    
+    float width = 2.0f;   // world units
+    float height = 3.0f;  // world units
     SDL_Texture* texture = nullptr;
+    
     float drawSize = 40.0f;
     void SetTexture(SDL_Texture* tex) { texture = tex; }
 
