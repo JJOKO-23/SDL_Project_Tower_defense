@@ -730,11 +730,16 @@ void Scene2::Render() const {
 	// tower render
 	Vec3 tpos = projectionMatrix * tower->pos;
 
-	SDL_FRect towerRect = { tpos.x - 120, tpos.y - 90, 150,90 }; //tower size (150,90)
+	SDL_FRect towerRect = { tpos.x - 120, tpos.y - 200, 150,200 }; //tower size (150,90)
 	SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
 	SDL_RenderFillRect(renderer, &towerRect);
 
+	// money bar
+	float mRatio = tower->GetMoney() / tower->GetMaxMoney();
+	SDL_FRect moneyBar = { towerRect.x, towerRect.y - 6, 150 * mRatio, 6 };
 
+	SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+	SDL_RenderFillRect(renderer, &moneyBar);
 
 	// Render the player here
 	screenCoords = projectionMatrix * player->pos;
@@ -750,6 +755,7 @@ void Scene2::Render() const {
 	SDL_RenderTextureRotated(renderer, pFrame, nullptr, &pr, 0, nullptr, flip);;
 	// draw AABB as green rectangle
 	DrawAABB(renderer, pr.x, pr.y, pr.w, pr.h, SDL_Color{ 0, 255, 0, 255 });
+
 	//Player HP bar render
 	Vec3 psc = projectionMatrix * player->pos;
 
@@ -841,13 +847,7 @@ void Scene2::Render() const {
 	}
 
 	
-
-	// money bar
-	float mRatio = tower->GetMoney() / tower->GetMaxMoney();
-	SDL_FRect moneyBar = { towerRect.x, towerRect.y - 6, 30 * mRatio, 6 };
-
-	SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
-	SDL_RenderFillRect(renderer, &moneyBar);
+	
 
 	//WAVE TEXT BOX 
 	SDL_FRect waveBarBg = { 500, 50, 300, 12 };
