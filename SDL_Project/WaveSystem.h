@@ -24,7 +24,12 @@ public:
     std::vector<Enemy*> enemies;
     Tower* tower = nullptr;
 
-    void Init(Tower* t);
+    std::vector<Platform*> platforms;
+
+
+
+    void Init(Tower* t, const std::vector<Platform*>& plats);
+    
     void StartWave();
     void Update(float dt, const Vec3& playerPos, float& playerHP);
     void CleanEnemies();

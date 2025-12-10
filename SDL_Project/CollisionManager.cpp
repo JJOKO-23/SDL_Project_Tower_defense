@@ -143,3 +143,61 @@ void CollisionManager::ResolvePush(Entity* a, Entity* b) {
         b->pos.y -= ny * overlap * 0.5f;
     }
 }
+
+void CollisionManager::CheckEnemyPlatform(Enemy* enemy, const std::vector<Platform*>& platforms)
+{
+    enemy->grounded = false;
+
+    for (auto plat : platforms)
+    {
+        float halfW = plat->width * 0.5f;
+        float halfH = plat->height * 0.5f;
+
+        float left = plat->pos.x - halfW;
+        float right = plat->pos.x + halfW;
+        float bottom = plat->pos.y - halfH;
+        float top = plat->pos.y + halfH;
+
+        float exLeft = enemy->pos.x - enemy->radius;
+        float exRight = enemy->pos.x + enemy->radius;
+        float exBottom = enemy->pos.y - enemy->radius;
+        float exTop = enemy->pos.y + enemy->radius;
+
+        bool intersects =
+            exRight > left &&
+            exLeft  < right &&
+            exTop   > bottom &&
+            exBottom < top;
+
+        if (!intersects) continue;
+
+        float overlapLeft = exRight - left;
+        float overlapRight = right - exLeft;
+        float overlapTop = top - exBottom;
+        float overlapBottom = exTop - bottom;
+
+        float minOverlap = std::min({ overlapLeft, overlapRight, overlapTop, overlapBottom });
+
+        if (minOverlap == overlapTop)
+        {
+            enemy->pos.y = top + enemy->radius;
+            enemy->vel.y = 0;
+            enemy->grounded = true;
+        }
+        else if (minOverlap == overlapBottom)
+        {
+            enemy->pos.y = bottom - enemy->radius;
+            enemy->vel.y = 0;
+        }
+        else if (minOverlap == overlapLeft)
+        {
+            enemy->pos.x = left - enemy->radius;
+            enemy->vel.x = 0;
+        }
+        else if (minOverlap == overlapRight)
+        {
+            enemy->pos.x = right + enemy->radius;
+            enemy->vel.x = 0;
+        }
+    }
+}

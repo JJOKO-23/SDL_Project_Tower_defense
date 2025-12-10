@@ -3,7 +3,8 @@
 #define ENEMY_H
 
 #include "Entity.h"
-
+#include <cmath>
+#include "Platform.h"
 class Enemy : public Entity {
 private:
     float hp;
@@ -13,12 +14,13 @@ private:
     
 
  
-    bool grounded = false;
+    
     float jumpForce = 12.0f;
     float gravity = 9.8f;
 
 
 public:
+    bool grounded = false;
     float width = 2.0f;   // world units
     float height = 3.0f;  // world units
     SDL_Texture* texture = nullptr;
@@ -29,7 +31,7 @@ public:
     Enemy(float hp_ = 50.0f, float dmg_ = 10.0f, float spd_ = 2.0f);
 
     void Update(float deltaTime) override;
-    void MoveTowards(const Vec3& targetPos);
+    void MoveTowards(const Vec3& targetPos, const std::vector<Platform*>& platforms);
 
     void TakeDamage(float amount);
     bool IsDead() const { return hp <= 0.0f; }

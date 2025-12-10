@@ -62,7 +62,9 @@ bool Scene2::OnCreate() {
 	tower->pos = Vec3(15, 2, 0);
 	
 	waves = new WaveSystem();
-	waves->Init(tower);
+	waves->Init(tower, platforms);
+
+
 
 	//ACTOR CREATION END
 
@@ -156,7 +158,7 @@ bool Scene2::OnCreate() {
 	ground->SetImage("textures/lalaBrick.png", renderer);
 	platforms.push_back(ground);
 
-	Platform* ground2 = new Platform(Vec3(24, 1, 0), 15, 2);
+	Platform* ground2 = new Platform(Vec3(24, 1, 0),20, 2);
 	ground2->SetImage("textures/lalaBrick.png", renderer);
 	platforms.push_back(ground2);
 
@@ -506,9 +508,15 @@ void Scene2::Update(const float deltaTime) {
 	player->Update(deltaTime);
 	waves->Update(deltaTime, player->pos, playerHP);
 	
-	for (auto e : waves->enemies) {
-		entities.push_back(e);
+
+	
+	for (Enemy* e : waves->enemies)
+	{
+		collisionManager->CheckEnemyPlatform(e, platforms);
 	}
+
+	
+	
 
 	collisionManager->CheckCollisions(entities);
 

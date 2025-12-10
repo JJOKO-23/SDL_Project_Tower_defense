@@ -2,10 +2,16 @@
 
 #include <cmath>
 
-void WaveSystem::Init(Tower* t) {
+
+
+void WaveSystem::Init(Tower* t, const std::vector<Platform*>& plats)
+
+{
     tower = t;
+    platforms = plats;
     StartWave();
 }
+
 
 void WaveSystem::StartWave() {
     CleanEnemies();
@@ -60,14 +66,15 @@ void WaveSystem::Update(float dt, const Vec3& playerPos, float& playerHP) {
         float distTower = sqrt(dxT * dxT + dyT * dyT);
        //detection raduis for player
         if (distPlayer < 10.0f) {
-            e->MoveTowards(playerPos);
+            e->MoveTowards(playerPos, platforms);
+
             if (distPlayer < 1.0f) {
                 playerHP -= e->GetDamage() * dt;
             }
         }
         else {
 			//Detection radius for tower
-            e->MoveTowards(tower->pos);
+            e->MoveTowards(tower->pos, platforms);
             if (distTower < 1.2f) {
                 e->vel = Vec3(0, 0, 0);  
                 tower->TakeDamage(e->GetDamage() * dt);
@@ -121,3 +128,4 @@ void WaveSystem::CleanEnemies() {
     }
     enemies.clear();
 }
+

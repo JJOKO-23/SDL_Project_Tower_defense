@@ -17,6 +17,9 @@ public:
     void CheckPlayerPlatform(Player* player, const std::vector<Platform*>& platforms);
     void ClampToWorld(Entity* obj);
 
+    void CheckEnemyPlatform(Enemy* enemy, const std::vector<Platform*>& platforms);
+
+
 private:
     float worldMinX;
     float worldMaxX;

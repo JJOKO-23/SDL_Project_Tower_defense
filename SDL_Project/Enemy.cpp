@@ -20,19 +20,49 @@ void Enemy::TakeDamage(float amount) {
     if (hp < 0) hp = 0;
 }
 
-void Enemy::MoveTowards(const Vec3& targetPos)
+void Enemy::MoveTowards(const Vec3& targetPos, const std::vector<Platform*>& platforms)
 {
     float dx = targetPos.x - pos.x;
-
     vel.x = (dx > 0 ? 1.0f : -1.0f) * speed;
 
     
-    if (targetPos.y > pos.y + 1.0f && grounded)
+    bool onEdge = true;
+
+    for (auto plat : platforms)
+    {
+        float halfW = plat->width * 0.5f;
+        float left = plat->pos.x - halfW;
+        float right = plat->pos.x + halfW;
+        float top = plat->pos.y + plat->height * 0.5f;
+
+        if (fabs(pos.y - top) < 0.2f) 
+        {
+            if (vel.x > 0 && pos.x > right - 0.3f) onEdge = true;
+            else if (vel.x < 0 && pos.x < left + 0.3f) onEdge = true;
+            else onEdge = false;
+        }
+    }
+
+    if (onEdge && grounded)
+    {
+        vel.x = 0; 
+    }
+
+    
+    if (targetPos.y > pos.y + 0.5f && grounded)
     {
         vel.y = jumpForce;
         grounded = false;
     }
+
+    
+    if (targetPos.y < pos.y - 1.0f && grounded)
+    {
+        pos.y -= 0.1f; 
+        grounded = false;
+    }
 }
+
 
 
 void Enemy::Update(float deltaTime)
