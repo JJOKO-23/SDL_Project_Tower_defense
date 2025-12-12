@@ -69,10 +69,24 @@ void WaveSystem::StartWave() {
             2.0f
         );
 
-        e->pos = Vec3(2 + i, 12, 0);
+        //e->pos = Vec3(2 + i, 12, 0); 
+
+        float spawnLeftX = 2.0f;
+        float spawnRightX = 28.0f; 
+        float spawnY = 12.0f;
+
+        float offset = 0.8f; 
+
+        if (i % 2 == 0)
+        {
+            e->pos = Vec3(spawnLeftX + i * offset, spawnY, 0);
+        }
+        else
+        {
+            e->pos = Vec3(spawnRightX - i * offset, spawnY, 0);
+        }
 
         
-        e->SetTexture(IMG_LoadTexture(renderer, "textures/grass.jpg"));
 
         enemies.push_back(e);
     }

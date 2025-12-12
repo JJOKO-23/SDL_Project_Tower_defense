@@ -190,25 +190,25 @@ bool Scene2::OnCreate() {
 
 	//PLATFORMS	START
 
-	Platform* ground = new Platform(Vec3(5, 1, 0), 15, 2);
+	Platform* ground = new Platform(Vec3(5, 0, 0), 20, 2);
 	ground->SetImage("textures/lalaBrick.png", renderer);
 	platforms.push_back(ground);
 
-	Platform* ground2 = new Platform(Vec3(24, 1, 0),20, 2);
+	Platform* ground2 = new Platform(Vec3(20, 0, 0),20, 2);
 	ground2->SetImage("textures/lalaBrick.png", renderer);
 	platforms.push_back(ground2);
 
-	Platform* block = new Platform(Vec3(5, 4, 0), 4, 1);
+	Platform* block = new Platform(Vec3(5, 3.5, 0), 5, 0.7);
 	block->SetImage("textures/lalaBrick.png", renderer);
 	platforms.push_back(block);
-	Platform* block2 = new Platform(Vec3(25, 5, 0), 4, 1);
+	Platform* block2 = new Platform(Vec3(25, 3.5, 0), 5, 0.7);
 	block2->SetImage("textures/lalaBrick.png", renderer);
 	platforms.push_back(block2);
 
-	Platform* block3 = new Platform(Vec3(10, 8, 0), 4, 1);
+	Platform* block3 = new Platform(Vec3(10, 7, 0), 5, 0.7);
 	block3->SetImage("textures/lalaBrick.png", renderer);
 	platforms.push_back(block3);
-	Platform* block4 = new Platform(Vec3(20, 8, 0), 4, 1);
+	Platform* block4 = new Platform(Vec3(20, 7, 0), 5, 0.7);
 	block4->SetImage("textures/lalaBrick.png", renderer);
 	platforms.push_back(block4);
 
@@ -217,13 +217,13 @@ bool Scene2::OnCreate() {
 	//PLATFORMS END
 
 	//**********************UUUUIII*********************
-
-	winTexture = IMG_LoadTexture(renderer, "textures/LOSE.png");
+	
+	loseTexture = IMG_LoadTexture(renderer, "textures/LOSE.png");
 	if (!winTexture)
 	{
 		std::cout << "Failed to load WIN texture: " << SDL_GetError() << std::endl;
 	}
-	loseTexture = IMG_LoadTexture(renderer, "textures/WIN.png");
+	winTexture = IMG_LoadTexture(renderer, "textures/WIN.png");
 	if (!winTexture)
 	{
 		std::cout << "Failed to load WIN texture: " << SDL_GetError() << std::endl;
@@ -534,7 +534,8 @@ void Scene2::HandleEvents(const SDL_Event& event)
 		event.button.button == SDL_BUTTON_LEFT)
 	{
 		
-		player->Attack((std::vector<Entity*>&)waves->enemies, projectiles);
+		player->Attack(waves->enemies, projectiles);
+
 
 	}
 }
@@ -832,13 +833,24 @@ void Scene2::Render() const {
 	towerRect.w = 280;   // подгони под картинку
 	towerRect.h = 360;
 	towerRect.x = tpos.x - towerRect.w * 0.5f;
-	towerRect.y = tpos.y - towerRect.h + 60;
+	towerRect.y = tpos.y - towerRect.h + 110;
 
 	SDL_RenderTexture(renderer, towerTexture, nullptr, &towerRect);
 
 	// money bar
+
+	
+	SDL_FRect towerHpBg;
+	towerHpBg.w = 150;
+	towerHpBg.h = 8;
+	towerHpBg.x = towerRect.x+60;       
+	towerHpBg.y = towerRect.y + 8;   
+
+	SDL_SetRenderDrawColor(renderer, 80, 80, 80, 255);
+	SDL_RenderFillRect(renderer, &towerHpBg);
+
 	float mRatio = tower->GetMoney() / tower->GetMaxMoney();
-	SDL_FRect moneyBar = { towerRect.x, towerRect.y - 6, 150 * mRatio, 6 };
+	SDL_FRect moneyBar = { towerRect.x+60, towerRect.y+8, 150 * mRatio, 8 };
 
 	SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
 	SDL_RenderFillRect(renderer, &moneyBar);
@@ -863,11 +875,11 @@ void Scene2::Render() const {
 
 	float hpRatio = playerHP / playerMaxHP;
 
-	SDL_FRect hpBg = { psc.x - 30, psc.y - 90, 60, 6 };
+	SDL_FRect hpBg = { psc.x - 30, psc.y - 70, 60, 6 };
 	SDL_SetRenderDrawColor(renderer, 80, 80, 80, 255);
 	SDL_RenderFillRect(renderer, &hpBg);
 
-	SDL_FRect hpFill = { psc.x - 30, psc.y - 90, 60 * hpRatio, 6 };
+	SDL_FRect hpFill = { psc.x - 30, psc.y - 70, 60 * hpRatio, 6 };
 	SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
 	SDL_RenderFillRect(renderer, &hpFill);
 
@@ -904,9 +916,6 @@ void Scene2::Render() const {
 		//SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 		//SDL_RenderFillRect(renderer, &r);
 
-		
-
-		
 
 		SDL_FRect er;
 		er.w = e->width * pixelsPerUnitX;
@@ -953,9 +962,9 @@ void Scene2::Render() const {
 
 		SDL_FRect hpBar;
 		hpBar.x = r.x;
-		hpBar.y = r.y - 8;
-		hpBar.w = 20 * hpRatio;
-		hpBar.h = 4;
+		hpBar.y = r.y - 33;
+		hpBar.w = 25 * hpRatio;
+		hpBar.h = 5;
 
 		SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
 		SDL_RenderFillRect(renderer, &hpBar);
@@ -987,7 +996,7 @@ void Scene2::Render() const {
 
 		SDL_FRect winRect;
 		winRect.w = 500;   // размер картинки WIN
-		winRect.h = 220;
+		winRect.h = 330;
 		winRect.x = (w - winRect.w) * 0.5f;
 		winRect.y = (h - winRect.h) * 0.35f;
 
@@ -1002,11 +1011,11 @@ void Scene2::Render() const {
 
 		SDL_FRect winRect;
 		winRect.w = 500;   // размер картинки WIN
-		winRect.h = 220;
+		winRect.h = 330;
 		winRect.x = (w - winRect.w) * 0.5f;
 		winRect.y = (h - winRect.h) * 0.35f;
 
-		SDL_RenderTexture(renderer, winTexture, nullptr, &winRect);
+		SDL_RenderTexture(renderer, loseTexture, nullptr, &winRect);
 	}
 
 

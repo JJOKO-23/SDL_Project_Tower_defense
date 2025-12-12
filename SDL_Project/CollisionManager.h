@@ -19,7 +19,7 @@ public:
 
     void CheckEnemyPlatform(Enemy* enemy, const std::vector<Platform*>& platforms);
 
-
+    
 private:
     float worldMinX;
     float worldMaxX;

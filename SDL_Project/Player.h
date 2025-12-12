@@ -25,7 +25,7 @@ public:
     float width = 1.0f;
     float height = 1.8f;
     bool facingRight = true;
-    float meleeDamage = 20.0f;
+    float meleeDamage = 80.0f;
     float meleeRadius = 2.0f;
     bool meleeMode = true;     
     float meleeRange = 1.5f;  
@@ -44,8 +44,8 @@ public:
 
     void HandleInput(const SDL_Event& event);
     void Update(float deltaTime) override;
-    void Attack(std::vector<Entity*>& enemies,
-        std::vector<Projectile*>& projectiles);
+    void Attack(std::vector<Enemy*>& enemies, std::vector<Projectile*>& projectiles);
+
 };
 
 #endif
