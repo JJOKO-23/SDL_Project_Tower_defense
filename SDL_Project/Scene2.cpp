@@ -145,6 +145,42 @@ bool Scene2::OnCreate() {
 	
 #pragma endregion
 
+	enemyAnimFrames.reserve(6);
+
+	SDL_Texture* ef0 = IMG_LoadTexture(renderer, "textures/enemy_attack (1).png");
+	SDL_Texture* ef1 = IMG_LoadTexture(renderer, "textures/enemy_attack (2).png");
+	SDL_Texture* ef2 = IMG_LoadTexture(renderer, "textures/enemy_attack (3).png");
+	SDL_Texture* ef3 = IMG_LoadTexture(renderer, "textures/enemy_attack (4).png");
+	SDL_Texture* ef4 = IMG_LoadTexture(renderer, "textures/enemy_attack (5).png");
+	SDL_Texture* ef5 = IMG_LoadTexture(renderer, "textures/enemy_attack (6).png");
+	SDL_Texture* ef6 = IMG_LoadTexture(renderer, "textures/enemy_attack (7).png");
+	SDL_Texture* ef7 = IMG_LoadTexture(renderer, "textures/enemy_attack (8).png");
+	SDL_Texture* ef8 = IMG_LoadTexture(renderer, "textures/enemy_attack (9).png");
+	SDL_Texture* ef9 = IMG_LoadTexture(renderer, "textures/enemy_attack (10).png");
+	SDL_Texture* ef10 = IMG_LoadTexture(renderer, "textures/enemy_attack (11).png");
+	SDL_Texture* ef11 = IMG_LoadTexture(renderer, "textures/enemy_attack (12).png");
+	
+
+	// Добавляем только реально загруженные
+	if (ef0) enemyAnimFrames.push_back(ef0);
+	if (ef1) enemyAnimFrames.push_back(ef1);
+	if (ef2) enemyAnimFrames.push_back(ef2);
+	if (ef3) enemyAnimFrames.push_back(ef3);
+	if (ef4) enemyAnimFrames.push_back(ef4);
+	if (ef5) enemyAnimFrames.push_back(ef5);
+	if (ef6) enemyAnimFrames.push_back(ef6);
+	if (ef7) enemyAnimFrames.push_back(ef7);
+	if (ef8) enemyAnimFrames.push_back(ef8);
+	if (ef9) enemyAnimFrames.push_back(ef9);
+	if (ef10) enemyAnimFrames.push_back(ef10);
+	if (ef11) enemyAnimFrames.push_back(ef11);;
+
+	enemyAnimFrames.reserve(12);
+
+	if (enemyAnimFrames.empty()) {
+		std::cout << "WARNING: Enemy animation frames not loaded. Will fallback to e->texture.\n";
+	}
+
 
 	// скорость анимации
 	player->animation.SetFPS(17.0f);
@@ -181,6 +217,23 @@ bool Scene2::OnCreate() {
 	//PLATFORMS END
 
 	//**********************UUUUIII*********************
+
+	winTexture = IMG_LoadTexture(renderer, "textures/LOSE.png");
+	if (!winTexture)
+	{
+		std::cout << "Failed to load WIN texture: " << SDL_GetError() << std::endl;
+	}
+	loseTexture = IMG_LoadTexture(renderer, "textures/WIN.png");
+	if (!winTexture)
+	{
+		std::cout << "Failed to load WIN texture: " << SDL_GetError() << std::endl;
+	}
+
+	towerTexture = IMG_LoadTexture(renderer, "textures/TOWER.png");
+	if (!towerTexture)
+	{
+		std::cout << "Failed to load tower texture: " << SDL_GetError() << std::endl;
+	}
 
 	mainMenuBackground = IMG_LoadTexture(renderer, "textures/MAIN_SCREEN.png");
 	SDL_GetWindowSize(window, &w, &h);
@@ -320,7 +373,11 @@ void Scene2::OnDestroy() {
 	//	MIX_DestroyAudio(gameMusic);
 	//	gameMusic = nullptr;
 	//}
-
+	/*for (SDL_Texture* t : enemyAnimFrames) {
+		if (t) SDL_DestroyTexture(t);
+	}*/
+	enemyAnimFrames.clear();
+	enemyAnim.clear();
 
 }
 
@@ -507,28 +564,62 @@ void Scene2::Update(const float deltaTime) {
 
 	player->Update(deltaTime);
 	waves->Update(deltaTime, player->pos, playerHP);
-	
 
-	
+	if (!enemyAnimFrames.empty())
+	{
+		// create / update anim state for each alive enemy
+		for (Enemy* e : waves->enemies)
+		{
+			if (!e) continue;
+
+			EnemyAnimState& st = enemyAnim[e]; // creates if missing
+			st.timer += deltaTime;
+
+			float frameTime = 1.0f / enemyAnimFPS;
+			while (st.timer >= frameTime)
+			{
+				st.timer -= frameTime;
+				st.frame = (st.frame + 1) % (int)enemyAnimFrames.size();
+			}
+		}
+
+		// cleanup states for enemies that no longer exist
+		for (auto it = enemyAnim.begin(); it != enemyAnim.end(); )
+		{
+			Enemy* key = it->first;
+
+			bool stillAlive = false;
+			for (Enemy* e : waves->enemies)
+			{
+				if (e == key) { stillAlive = true; break; }
+			}
+
+			if (!stillAlive) it = enemyAnim.erase(it);
+			else ++it;
+		}
+	}
+
+
+
 	for (Enemy* e : waves->enemies)
 	{
 		collisionManager->CheckEnemyPlatform(e, platforms);
 	}
 
-	
-	
+
+
 
 	collisionManager->CheckCollisions(entities);
 
-	
+
 	entities.clear();
 	entities.push_back(player);
 
 	//character->pos += character->vel * deltaTime;
 	collisionManager->CheckPlayerPlatform(player, platforms);
-	
-	
-	
+
+
+
 	//collisionManager->CheckCollisions(entities);
 	collisionManager->ClampToWorld(player);
 	player->animation.Update(deltaTime);
@@ -544,7 +635,7 @@ void Scene2::Update(const float deltaTime) {
 
 		bool destroyed = false;
 
-		
+
 		for (int e = (int)waves->enemies.size() - 1; e >= 0; e--)
 		{
 			float dx = fabs(projectiles[i]->pos.x - waves->enemies[e]->pos.x);
@@ -552,13 +643,19 @@ void Scene2::Update(const float deltaTime) {
 
 			if (dx < 1.0f && dy < 1.0f)
 			{
-				
+
 				waves->enemies[e]->TakeDamage(playerDamage);
 
-				
+
 				if (waves->enemies[e]->IsDead())
 				{
-					delete waves->enemies[e];
+					Enemy* dead = waves->enemies[e];
+
+					// убрать анимационное состояние
+					auto it = enemyAnim.find(dead);
+					if (it != enemyAnim.end()) enemyAnim.erase(it);
+
+					delete dead;
 					waves->enemies.erase(waves->enemies.begin() + e);
 				}
 
@@ -573,15 +670,16 @@ void Scene2::Update(const float deltaTime) {
 		if (destroyed)
 			continue;
 
-		
+
 		if (projectiles[i]->pos.x < 0 || projectiles[i]->pos.x > xAxis)
 		{
 			delete projectiles[i];
 			projectiles.erase(projectiles.begin() + i);
 		}
 	}
-	//projectiles update END
 }
+	//projectiles update END
+
 
 void DrawAABB(SDL_Renderer* renderer, float x, float y, float w, float h, SDL_Color color) {
 	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
@@ -723,16 +821,20 @@ void Scene2::Render() const {
 		SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
 		SDL_RenderFillRect(renderer, &r);
 		SDL_RenderTexture(renderer, p->texture, nullptr, &r);
-		DrawAABB(renderer, r.x, r.y, r.w, r.h, SDL_Color{ 255, 0, 0, 255 });
+		//DrawAABB(renderer, r.x, r.y, r.w, r.h, SDL_Color{ 255, 0, 0, 255 });
 	}
 	
 
 	// tower render
 	Vec3 tpos = projectionMatrix * tower->pos;
 
-	SDL_FRect towerRect = { tpos.x - 120, tpos.y - 200, 150,200 }; //tower size (150,90)
-	SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-	SDL_RenderFillRect(renderer, &towerRect);
+	SDL_FRect towerRect;
+	towerRect.w = 280;   // подгони под картинку
+	towerRect.h = 360;
+	towerRect.x = tpos.x - towerRect.w * 0.5f;
+	towerRect.y = tpos.y - towerRect.h + 60;
+
+	SDL_RenderTexture(renderer, towerTexture, nullptr, &towerRect);
 
 	// money bar
 	float mRatio = tower->GetMoney() / tower->GetMaxMoney();
@@ -754,7 +856,7 @@ void Scene2::Render() const {
 
 	SDL_RenderTextureRotated(renderer, pFrame, nullptr, &pr, 0, nullptr, flip);;
 	// draw AABB as green rectangle
-	DrawAABB(renderer, pr.x, pr.y, pr.w, pr.h, SDL_Color{ 0, 255, 0, 255 });
+	//DrawAABB(renderer, pr.x, pr.y, pr.w, pr.h, SDL_Color{ 0, 255, 0, 255 });
 
 	//Player HP bar render
 	Vec3 psc = projectionMatrix * player->pos;
@@ -799,8 +901,8 @@ void Scene2::Render() const {
 		float enemyW = 2.0f;
 		float enemyH = 2.5f;
 
-		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-		SDL_RenderFillRect(renderer, &r);
+		//SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+		//SDL_RenderFillRect(renderer, &r);
 
 		
 
@@ -813,9 +915,22 @@ void Scene2::Render() const {
 		er.x = sc.x - er.w * 0.5f;
 		er.y = sc.y - er.h * 0.5f;
 
-		SDL_RenderTexture(renderer, e->texture, nullptr, &er);
+		//SDL_RenderTexture(renderer, e->texture, nullptr, &er);
 
-		
+		SDL_Texture* enemyFrame = e->texture; // fallback
+
+		if (!enemyAnimFrames.empty())
+		{
+			auto it = enemyAnim.find(e);
+			if (it != enemyAnim.end())
+			{
+				int idx = it->second.frame;
+				if (idx >= 0 && idx < (int)enemyAnimFrames.size())
+					enemyFrame = enemyAnimFrames[idx];
+			}
+		}
+
+		SDL_RenderTexture(renderer, enemyFrame, nullptr, &er);
 
 		Vec3 aabbMin(e->pos.x - enemyW / 2, e->pos.y - enemyH / 2, 0);
 		Vec3 aabbMax(e->pos.x + enemyW / 2, e->pos.y + enemyH / 2, 0);
@@ -830,8 +945,8 @@ void Scene2::Render() const {
 		box.w = scMax.x - scMin.x;
 		box.h = scMax.y - scMin.y;
 
-		SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); // жёлтый хитбокс
-		SDL_RenderRect(renderer, &box);
+		//SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); // жёлтый хитбокс
+		//DL_RenderRect(renderer, &box);
 
 		// HP BAR 
 		float hpRatio = e->GetHP() / e->GetMaxHP();
@@ -865,19 +980,33 @@ void Scene2::Render() const {
 
 
 	//GAME WON SCREEN
-	if (waves->gameWon)
+	if (waves->gameWon && winTexture)
 	{
-		SDL_FRect winBox = { 400, 200, 500, 200 };
-		SDL_SetRenderDrawColor(renderer, 0, 255, 0, 200);
-		SDL_RenderFillRect(renderer, &winBox);
+		int w, h;
+		SDL_GetWindowSize(window, &w, &h);
+
+		SDL_FRect winRect;
+		winRect.w = 500;   // размер картинки WIN
+		winRect.h = 220;
+		winRect.x = (w - winRect.w) * 0.5f;
+		winRect.y = (h - winRect.h) * 0.35f;
+
+		SDL_RenderTexture(renderer, winTexture, nullptr, &winRect);
 	}
 
 	//GAME LOST SCREEN
 	if (waves->gameLost)
 	{
-		SDL_FRect loseBox = { 400, 200, 500, 200 };
-		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 200);
-		SDL_RenderFillRect(renderer, &loseBox);
+		int w, h;
+		SDL_GetWindowSize(window, &w, &h);
+
+		SDL_FRect winRect;
+		winRect.w = 500;   // размер картинки WIN
+		winRect.h = 220;
+		winRect.x = (w - winRect.w) * 0.5f;
+		winRect.y = (h - winRect.h) * 0.35f;
+
+		SDL_RenderTexture(renderer, winTexture, nullptr, &winRect);
 	}
 
 

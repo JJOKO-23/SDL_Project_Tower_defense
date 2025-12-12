@@ -13,6 +13,7 @@
 #include "Projectile.h"
 #include <SDL3/SDL_mixer.h>
 #include "WaveSystem.h"
+#include <unordered_map>
 
 
 using namespace MATH;
@@ -66,12 +67,22 @@ private:
 	SDL_FRect mainMenuRect;
 
 
+	struct EnemyAnimState {
+		float timer = 0.0f;
+		int frame = 0;
+	};
 
+	std::vector<SDL_Texture*> enemyAnimFrames;
+	float enemyAnimFPS = 10.0f;
+	std::unordered_map<Enemy*, EnemyAnimState> enemyAnim;
 
 	SDL_Texture* settingsButtonTexture = nullptr;
 	SDL_Texture* settingsBackground = nullptr;
 	SDL_Texture* volumeBarTexture = nullptr;
 	SDL_Texture* backButtonTexture = nullptr;
+	SDL_Texture* towerTexture = nullptr;
+	SDL_Texture* winTexture = nullptr;
+	SDL_Texture* loseTexture = nullptr;
 
 	SDL_FRect settingsButtonRect;
 	bool showSettingsMenu = false;
