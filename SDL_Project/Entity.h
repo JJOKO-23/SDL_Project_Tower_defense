@@ -4,6 +4,7 @@
 #include <Vector.h>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_image.h>
+#include "Animation.h"
 using namespace MATH;
 
 class Entity {
@@ -11,10 +12,11 @@ private:
 	// Keep these private as we should only build them in the setImage method
 	// I do listen to Scott sometimes...
 	SDL_Surface* surface; // Used to get the width and height of the image
-	SDL_Texture* texture; // Used to render the image
+	 // Used to render the image
 
 public:
 	float angleDeg;
+	SDL_Texture* texture;
 	Vec3 pos;
 	Vec3 vel;
 	Vec3 acc;
@@ -25,6 +27,9 @@ public:
 	Entity();
 	~Entity();
 	void SetImage(const char* filename, SDL_Renderer* renderer);
+	void AddAnimationFrame(const char* filename, SDL_Renderer* renderer);
+
+	Animation animation;
 
 	// Just like assignment 1!
 	void ApplyForce(Vec3 netForce);

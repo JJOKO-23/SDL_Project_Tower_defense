@@ -1,4 +1,4 @@
-#include "Entity.h"
+﻿#include "Entity.h"
 
 Entity::Entity(): // this is an initializer list
 	surface(nullptr) 
@@ -26,6 +26,20 @@ void Entity::SetImage(const char* filename, SDL_Renderer* renderer) {
 	}
 	// We will use the texture to render to screen later on
 	texture = SDL_CreateTextureFromSurface(renderer, surface);
+}
+
+//ИСЛЛАААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААМ
+// вот это анимация  не трогай пжшка // ok 
+void Entity::AddAnimationFrame(const char* filename, SDL_Renderer* renderer) {
+	SDL_Surface* surf = IMG_Load(filename);
+	if (!surf) {
+		std::cerr << "Failed to load frame: " << filename << "\n";
+		return;
+	}
+	SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
+	animation.AddFrame(tex);
+
+	if (!surface) surface = surf;
 }
 
 void Entity::ApplyForce(Vec3 netForce)

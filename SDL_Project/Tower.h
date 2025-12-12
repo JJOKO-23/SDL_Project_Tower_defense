@@ -4,17 +4,22 @@
 
 #include "Entity.h"
 
+
 class Tower : public Entity {
 private:
-    float health;
-    float maxHealth;
+    float money;
+    float maxMoney;
 
 public:
-    Tower(float hp = 200.0f);
-    ~Tower() = default;
+    Tower(float cash = 200.0f);
 
     void TakeDamage(float amount);
-    bool IsDestroyed() const { return health <= 0.0f; }
+
+    float GetMoney() const { return money; }
+    float GetMaxMoney() const { return maxMoney; }
+
+    bool IsDestroyed() const { return money <= 0.0f; }
+
     void Update(float deltaTime) override {}
 };
 
